@@ -1,0 +1,5 @@
+UrnTheory   Vignette explaining the distributions of biased sampling
+CompareHypergeo   Compares different noncentral hypergeometric distributions
+ApproxHypergeo Compares different noncentral hypergeometric distributions with same mean rather than same odds
+OddsPrecision  Measures precision of odds function
+SampleWallenius   Makes random variates from Wallenius noncentral hypergeometric distribution
