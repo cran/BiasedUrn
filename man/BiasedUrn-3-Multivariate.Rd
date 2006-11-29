@@ -12,6 +12,8 @@
 \alias{momentsMFNCHypergeo}
 \alias{oddsMWNCHypergeo}
 \alias{oddsMFNCHypergeo}
+\alias{numMWNCHypergeo}
+\alias{numMFNCHypergeo}
 \alias{minMHypergeo}
 \alias{maxMHypergeo}
 
@@ -48,21 +50,24 @@ momentsMWNCHypergeo(m, n, odds, precision = 0.1)
 momentsMFNCHypergeo(m, n, odds, precision = 0.1)
 oddsMWNCHypergeo(mu, m, n, precision = 0.1)
 oddsMFNCHypergeo(mu, m, n, precision = 0.1)
+numMWNCHypergeo(mu, n, N, odds, precision = 0.1)
+numMFNCHypergeo(mu, n, N, odds, precision = 0.1)
 minMHypergeo(m, n)
 maxMHypergeo(m, n)
 }
 
 \arguments{
 \item{x}{Number of balls of each color sampled.  
-Vector with length = number of colors, or matrix with nrows = number of colors}
+Vector with length = number of colors, or matrix with nrows = number of colors.}
 \item{m}{Initial number of balls of each color in the urn.  
-Length of vector = number of colors}
-\item{n}{Total number of balls sampled.  Scalar}
+Length of vector = number of colors.}
+\item{n}{Total number of balls sampled.  Scalar.}
+\item{N}{Total number of balls in urn before sampling.  Scalar.}
 \item{odds}{Odds for each color.  Length of vector = number of colors.  
 The scalar 1 is accepted to give the (central) multivariate hypergeometric distribution.}
-\item{nran}{Number of random variates to generate.  Scalar}
-\item{mu}{Mean x for each color. Length of vector = number of colors}
-\item{precision}{Desired precision of calculation.  Scalar}
+\item{nran}{Number of random variates to generate.  Scalar.}
+\item{mu}{Mean x for each color. Length of vector = number of colors.}
+\item{precision}{Desired precision of calculation.  Scalar.}
 }
  
 \details{
@@ -73,7 +78,8 @@ element for each color.  These vectors must have the same length.
 The number of rows in this matrix must be equal to the number of colors.  
 The maximum number of colors is currently set to 32.
 
-All parameters must be non-negative.  \code{n} cannot exceed \code{sum(m)}.
+All parameters must be non-negative.  
+\code{n} cannot exceed \code{N = sum(m)}.
 The odds may be arbitrarily scaled.  
 The code has been tested with odds ratios in the range 
 \eqn{10^{-9} \ldots 10^9}{1E-9 to 1E9} and zero.  
@@ -105,8 +111,8 @@ observation.  The number of rows must be equal to the number of colors.
 \code{rMWNCHypergeo} and \code{rMFNCHypergeo} return random vectors with
 the multivariate Wallenius' and Fisher's noncentral hypergeometric 
 distribution, respectively.  
-A vector is returned when \eqn{nran = 1}.  A matrix with one column for each
-observation is returned when \eqn{nran > 1}.
+A vector is returned when \code{nran = 1}.  A matrix with one column for each
+observation is returned when \code{nran > 1}.
 \cr
 
 \code{meanMWNCHypergeo} and \code{meanMFNCHypergeo} return the mean
@@ -132,12 +138,26 @@ Calculating the mean and variance in the same operation saves time when
 \code{precision} < 0.1.
 \cr
 
-\code{oddsMWNCHypergeo} and \code{oddsMFNCHypergeo} calculate the odds
+\code{oddsMWNCHypergeo} and \code{oddsMFNCHypergeo} estimate the odds
 from an observed mean for the multivariate Wallenius' and 
 Fisher's noncentral hypergeometric distribution, respectively.  
+A vector of odds is returned if \code{mu} is a vector.  
+A matrix is returned if \code{mu} is a matrix with one row for each color.  
 A simple and fast approximation is used regardless of the specified precision.  
 Exact calculation is not supported.  
 See \code{demo(OddsPrecision)}.
+\cr
+
+\code{numMWNCHypergeo} and \code{numMFNCHypergeo} estimate the 
+number of balls of each color in the urn before sampling from
+experimental mean and known odds ratios for
+Wallenius' and Fisher's noncentral hypergeometric distributions.  
+The returned \code{m} values are not integers.  
+A vector of \code{m} is returned if \code{mu} is a vector.  
+A matrix of \code{m} is returned if \code{mu} is a matrix with one row for each color.  
+A simple and fast approximation is used regardless of the specified precision.  
+Exact calculation is not supported.  
+The precision of calculation is indicated by \code{demo(OddsPrecision)}.  
 \cr
 
 \code{minMHypergeo} and \code{maxMHypergeo} calculate the 

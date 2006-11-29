@@ -1243,7 +1243,8 @@ SEXP rprecision  // Precision of calculation
    if (m1 < 0 || m2 < 0 || n < 0) error("Negative parameter");
    if ((unsigned int)N > 2000000000) error("Overflow");
    if (n > N) error ("n > m1 + m2: Taking more items than there are");
-   if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 1E-7;
+   if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 0.1;
+   if (prec < 0.05) warning ("Cannot obtain high precision");
 
    // Allocate result vector
    SEXP result;  double * presult;
@@ -1302,7 +1303,7 @@ SEXP rprecision  // Precision of calculation
       Estimate odds ratio from mean for
       Wallenius' NonCentral Hypergeometric distribution.
 ******************************************************************************/
-// Uses approximation. precision is ignored.
+// Uses Manly's approximation. precision is ignored.
 REXPORTS SEXP oddsWNCHypergeo(
 SEXP rmu,        // Observed mean of x1
 SEXP rm1,        // Number of red balls in urn
@@ -1311,7 +1312,7 @@ SEXP rn,         // Number of balls drawn from urn
 SEXP rprecision  // Precision of calculation
 ) {
    // Check for vectors
-   if (LENGTH(rmu)          < 1 
+   if (LENGTH(rmu)         < 1 
    || LENGTH(rm1)         != 1 
    || LENGTH(rm2)         != 1 
    || LENGTH(rn)          != 1 
@@ -1335,7 +1336,8 @@ SEXP rprecision  // Precision of calculation
    if (m1 < 0 || m2 < 0 || n < 0) error("Negative parameter");
    if ((unsigned int)N > 2000000000) error("Overflow");
    if (n > N) error ("n > m1 + m2: Taking more items than there are");
-   if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 1E-7;
+   if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 0.1;
+   if (prec < 0.02) warning ("Cannot obtain high precision");
 
    // Allocate result vector
    SEXP result;  double * presult;
@@ -1382,6 +1384,260 @@ SEXP rprecision  // Precision of calculation
       if (err & 4) warning("odds is infinite");
       if (err & 2) warning("odds is zero with no precision");
    }
+
+   // Return result
+   UNPROTECT(1);
+   return(result);
+}
+
+
+/******************************************************************************
+      numWNCHypergeo
+      Estimate number of balls of each color from experimental mean for
+      Wallenius' NonCentral Hypergeometric distribution.
+******************************************************************************/
+// Uses Manly's approximation. Precision is ignored.
+/* Calculation method:
+   Manly's approximate equation for the mean is transformed to:
+   log(1-mu1/m1) = omega*(log(1-mu2/(N-m1))
+   This equation is solved by Newton-Raphson iteration
+*/
+REXPORTS SEXP numWNCHypergeo(
+SEXP rmu,        // Observed mean of x1
+SEXP rn,         // Number of balls drawn from urn
+SEXP rN,         // Number of balls in urn before sampling
+SEXP rodds,      // Odds of getting a red ball among one red and one white
+SEXP rprecision  // Precision of calculation
+) {
+   // Check for vectors
+   if (LENGTH(rmu)         < 1 
+   || LENGTH(rn)          != 1 
+   || LENGTH(rN)          != 1 
+   || LENGTH(rodds)       != 1 
+   || LENGTH(rprecision)  != 1 
+   ) {
+      error("Parameter has wrong length");
+   }
+   // Get parameter values
+   double *pmu  =  REAL(rmu);
+   int     n    = *INTEGER(rn);
+   int     N    = *INTEGER(rN);
+   double  odds = *REAL(rodds);
+   double  prec = *REAL(rprecision);
+   int     nres = LENGTH(rmu);
+   int     i;                          // Loop counter
+   int     err  = 0;                   // Remember any error
+
+   // Check validity of parameters
+   if (nres < 0) error("mu has wrong length");
+   if (n < 0 || N < 0) error("Negative parameter");
+   if ((unsigned int)N > 2000000000) error("Overflow");
+   if (n > N) error ("n > N: Taking more items than there are");
+   if (!R_FINITE(odds) || odds < 0) error("Invalid value for odds");
+   if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 0.1;
+   if (prec < 0.02) warning ("Cannot obtain high precision");
+
+   // Allocate result vector
+   SEXP result;  double * presult;
+   if (nres == 1) {
+      PROTECT(result = allocVector(REALSXP, 2));
+   }
+   else {
+      PROTECT(result = allocMatrix(REALSXP, 2, nres));
+   }
+   presult = REAL(result);
+
+   // Loop for all mu inputs
+   for (i = 0; i < nres; i++, presult += 2) {
+      double mu = pmu[i];
+
+      // Check limits
+      if (n == 0) {
+         presult[0] = presult[1] = R_NaN;  
+         err |= 1;         // Indetermined
+         continue;
+      }
+      if (odds == 0.) {
+         presult[0] = presult[1] = R_NaN;
+         if (mu == 0.) err |= 1;  // Indetermined
+         else err |= 0x10;        // Out of range
+         continue;
+      }
+      if (n == N) {        // Known exactly
+         presult[0] = mu;
+         presult[1] = N - mu;
+         continue;
+      }
+      if (mu <= 0.) {
+         if (mu == 0.) {
+            presult[0] = 0;  presult[1] = N;
+            err |= 2;         // Zero
+            continue;
+         }
+         presult[0] = presult[1] = R_NaN;  
+         err |= 8;         // Out of range
+         continue;
+      }
+      if (mu >= double(n)) {
+         if (mu == double(n)) {
+            presult[0] = N;  presult[1] = 0;
+            err |= 4;   // Infinite
+            continue;
+         }
+         presult[0] = presult[1] = R_NaN;  
+         err |= 8;         // Out of range  
+         continue;
+      }
+
+      // Calculate m1
+      double z, zd, m1, m2, lastm1, mu2 = n - mu;
+
+      // Initial guess
+      m1 = N * mu / n;
+      m2 = N - m1;
+      int niter = 0;
+
+      // Newton Raphson iteration
+      do {
+         lastm1 = m1;
+         z = log(1. - mu/m1) - odds*log(1. - mu2/m2);
+         zd = mu/(m1*(m1-mu)) + odds*mu2/(m2*(m2-mu2));
+         m1 -= z / zd;
+         if (m1 <= mu) { // out of range
+            m1 = (lastm1 + mu) * 0.5;
+         }
+         m2 = N - m1;
+         if (m2 <= mu2) { // out of range
+            m2 = (N - lastm1 + mu2) * 0.5;
+            m1 = N - m2;
+         }
+         if (++niter > 200) error ("Convergence problem");
+
+      } while (fabs(m1-lastm1) > N * 1E-10);
+
+      presult[0] = m1;  presult[1] = N - m1;
+   }
+
+   // Check for errors
+   if (err & 0x08) error("mu out of range");
+   else {
+      if (err & 0x10) warning("Zero odds conflicts with nonzero mean");
+      if (err & 1) warning("odds is indetermined");
+   }
+   //else if (err & 6) warning("result is independent of odds");
+
+   // Return result
+   UNPROTECT(1);
+   return(result);
+}
+
+
+/******************************************************************************
+      numFNCHypergeo
+      Estimate number of balls of each color from experimental mean for
+      Fisher's NonCentral Hypergeometric distribution.
+******************************************************************************/
+// Uses Cornfield's approximation. Precision is ignored.
+REXPORTS SEXP numFNCHypergeo(
+SEXP rmu,        // Observed mean of x1
+SEXP rn,         // Number of balls drawn from urn
+SEXP rN,         // Number of balls in urn before sampling
+SEXP rodds,      // Odds of getting a red ball among one red and one white
+SEXP rprecision  // Precision of calculation
+) {
+   // Check for vectors
+   if (LENGTH(rmu)         < 1 
+   || LENGTH(rn)          != 1 
+   || LENGTH(rN)          != 1 
+   || LENGTH(rodds)       != 1 
+   || LENGTH(rprecision)  != 1 
+   ) {
+      error("Parameter has wrong length");
+   }
+   // Get parameter values
+   double *pmu  =  REAL(rmu);
+   int     n    = *INTEGER(rn);
+   int     N    = *INTEGER(rN);
+   double  odds = *REAL(rodds);
+   double  prec = *REAL(rprecision);
+   int     nres = LENGTH(rmu);
+   int     i;                          // Loop counter
+   int     err  = 0;                   // Remember any error
+
+   // Check validity of parameters
+   if (nres < 0) error("mu has wrong length");
+   if (n < 0 || N < 0) error("Negative parameter");
+   if ((unsigned int)N > 2000000000) error("Overflow");
+   if (n > N) error ("n > N: Taking more items than there are");
+   if (!R_FINITE(odds) || odds < 0) error("Invalid value for odds");
+   if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 0.1;
+   if (prec < 0.02) warning ("Cannot obtain high precision");
+
+   // Allocate result vector
+   SEXP result;  double * presult;
+   if (nres == 1) {
+      PROTECT(result = allocVector(REALSXP, 2));
+   }
+   else {
+      PROTECT(result = allocMatrix(REALSXP, 2, nres));
+   }
+   presult = REAL(result);
+
+   // Loop for all mu inputs
+   for (i = 0; i < nres; i++, presult += 2) {
+      double mu = pmu[i];
+
+      // Check limits
+      if (n == 0) {
+         presult[0] = presult[1] = R_NaN;  
+         err |= 1;         // Indetermined
+         continue;
+      }
+      if (odds == 0.) {
+         presult[0] = presult[1] = R_NaN;
+         if (mu == 0.) err |= 1;  // Indetermined
+         else err |= 0x10;        // Out of range
+         continue;
+      }
+      if (n == N) {        // Known exactly
+         presult[0] = mu;
+         presult[1] = N - mu;
+         continue;
+      }
+      if (mu <= 0.) {
+         if (mu == 0.) {
+            presult[0] = 0;  presult[1] = N;
+            err |= 2;         // Zero
+            continue;
+         }
+         presult[0] = presult[1] = R_NaN;  
+         err |= 8;         // Out of range
+         continue;
+      }
+      if (mu >= double(n)) {
+         if (mu == double(n)) {
+            presult[0] = N;  presult[1] = 0;
+            err |= 4;   // Infinite
+            continue;
+         }
+         presult[0] = presult[1] = R_NaN;  
+         err |= 8;         // Out of range  
+         continue;
+      }
+
+      // Calculate m1
+      double mu2 = n - mu, mu_o = mu / odds;;
+      double m1 = (mu_o*(N-mu2) + mu*mu2) / (mu_o + mu2);
+      presult[0] = m1;  presult[1] = N - m1;
+   }
+
+   // Check for errors
+   if (err & 0x08) error("mu out of range");
+   else {
+      if (err & 0x10) warning("Zero odds conflicts with nonzero mean");
+      if (err & 1) warning("odds is indetermined");
+   }
+   //else if (err & 6) warning("result is independent of odds");
 
    // Return result
    UNPROTECT(1);

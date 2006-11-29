@@ -327,6 +327,46 @@ function(mu, m1, m2, n, precision=0.1)  {
 
 
 # *****************************************************************************
+#    numFNCHypergeo
+#    Estimate number of balls of each color from experimental mean for
+#    Fisher's NonCentral Hypergeometric distribution
+# *****************************************************************************
+# Uses Cornfield's approximation. Specified precision is ignored.
+numFNCHypergeo <-
+function(mu, n, N, odds, precision=0.1)  {
+   stopifnot(is.numeric(mu), is.numeric(n), is.numeric(N),
+   is.numeric(odds), is.numeric(precision));
+   .Call("numFNCHypergeo", 
+   as.double(mu),         # Observed mean of x1
+   as.integer(n),         # Number of balls sampled
+   as.integer(N),         # Number of balls in urn before sampling
+   as.double(odds),       # Odds of getting a red ball among one red and one white
+   as.double(precision),  # Precision of calculation (ignored)
+   PACKAGE = "BiasedUrn");
+}
+
+
+# *****************************************************************************
+#    numWNCHypergeo
+#    Estimate number of balls of each color from experimental mean for
+#    Wallenius' NonCentral Hypergeometric distribution
+# *****************************************************************************
+# Uses approximation. Specified precision is ignored.
+numWNCHypergeo <-
+function(mu, n, N, odds, precision=0.1)  {
+   stopifnot(is.numeric(mu), is.numeric(n), is.numeric(N),
+   is.numeric(odds), is.numeric(precision));
+   .Call("numWNCHypergeo", 
+   as.double(mu),         # Observed mean of x1
+   as.integer(n),         # Number of balls sampled
+   as.integer(N),         # Number of balls in urn before sampling
+   as.double(odds),       # Odds of getting a red ball among one red and one white
+   as.double(precision),  # Precision of calculation (ignored)
+   PACKAGE = "BiasedUrn");
+}
+
+
+# *****************************************************************************
 #    minHypergeo
 #    Minimum of x for central and noncentral Hypergeometric distributions
 # *****************************************************************************

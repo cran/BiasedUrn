@@ -1,5 +1,7 @@
 \documentclass[a4paper]{article}
 
+% Note: Remember to edit the .Snw file, not the .tex file!
+
 %\VignetteIndexEntry{Biased Urn Theory}
 %\VignettePackage{BiasedUrn}
 
@@ -76,7 +78,7 @@ $\boldsymbol{m}=(m_1,m_2,\ldots,m_c)$
 is the initial number of balls of each color in the urn.\\
 $\boldsymbol{\omega}=(\omega_1,\omega_2,\ldots,\omega_c)$
 is the weight or odds of balls of each color.\\
-$n = \sum_{i=1}^c x_i$ is the number of balls drawn.\\
+$n = \sum_{i=1}^c x_i$ is the total number of balls drawn.\\
 $c$ is the number of colors. The unexpected integral in this 
 formula arises as the solution to a difference equation.
 (The above formula is invalid in the trivial case $n = N$.)
@@ -132,7 +134,8 @@ of colors is more than $2$.
 The above formulas apply to any number of colors $c$. The univariate
 distributions can be expressed by setting 
 $c=2$, $\:x_1=x$, $\:x_2=n-x$, $\:m_1=m$, $\:m_2=N-m$,
-$\:\omega_1=\omega$, $\:\omega_2=1$.
+$\:\omega_1=\omega$, $\:\omega_2=1$
+in the above formulas.
 
 
 \section{Name confusion}
@@ -191,7 +194,8 @@ the Fisher distribution is a conditional distribution which can only
 be determined after the experiment when $n$ is known. The unconditional
 distribution is $c$ independent binomials.
 
-The difference between the two distributions is low when odds ratios are
+The difference between Wallenius' and Fisher's distributions is low 
+when odds ratios are
 near 1, and $n$ is low compared to $N$. The difference between the two 
 distributions becomes higher when odds ratios are high and $n$ is near $N$.
 
@@ -201,12 +205,13 @@ We want to calculate the probability that the red ball is not taken.
 The probability that the red ball is not taken in the first draw is 
 $\frac{1000}{2000} = \frac 12$. The probability that the red ball is
 not taken in the second draw, under the condition that it was not taken
-in the first draw, is $\frac{999}{1999} \approx \frac 12$.
+in the first draw, is $\frac{999}{1999} \approx \frac 12$.  
 The probability that the red ball is
 not taken in the third draw, under the condition that it was not taken
-in the first two draws, is $\frac{998}{1998} \approx \frac 12$. 
+in the first two draws, is $\frac{998}{1998} \approx \frac 12$.  
 Continuing in this way, we can calculate that the probability of not
-taking the red ball in $n$ draws is approximately $2^{-n}$. 
+taking the red ball in $n$ draws is approximately $2^{-n}$ for moderate
+values of $n$.  
 In other words, the probability of not taking a very heavy ball in $n$ 
 draws falls almost exponentially with $n$ in Wallenius' model.
 The exponential function arises because the probabilities for each draw
@@ -237,7 +242,7 @@ moment. The weight of an item depends only on its kind (color) $i$.
 physical property that determines the odds is something else than weight).
 %
 \item The total number $n$ of items to take is fixed and independent of
-the weights of the items that are taken.
+which items happen to be taken.
 %
 \end{itemize}
 \vskip 5mm
@@ -339,7 +344,7 @@ You are stopping when the total weight of the fish you have caught
 exceeds a predetermined limit.
 
 The resulting distribution will be close to Wallenius' distribution,
-but not exact because the decision to stop depends on the weight of
+but not exactly because the decision to stop depends on the weight of
 the fish you have caught so far. $n$ is therefore not known exactly
 before the fishing trip.
 
@@ -356,6 +361,59 @@ at the same time.
 
 These conclusions can of course be applied to biased sampling of
 other items than fish.
+
+
+\section{Applications}
+%
+The biased urn models can be applied to many different situations
+where items are sampled with bias and without replacement.
+
+\subsection{\tt Calculating probabilities etc.}
+Probabilities, mean and variance can be calculated with the appropriate
+functions. More complicated systems, such as the natural selection
+of animals, can be treated with Monte Carlo simulation, using the
+random variate generating functions.
+
+\subsection{\tt Measuring odds ratios}
+The odds of a sampling process can be measured by an experiment or
+a series of experiments where the number of items sampled of
+each kind (color) is counted.
+
+It is recommended to use sampling with replacement if possible.  
+Sampling with replacement makes it possible to use the binomial
+distribution, whereby the calculation of the odds becomes simpler
+and more accurate. If sampling with replacement is not possible,
+then the procedure of sampling without replacement must be 
+carefully controlled in order to get a pure Wallenius' distribution 
+or a pure Fisher's distribution rather than a mixture of the two, 
+as explained in the examples above.
+Use the {\tt odds} functions to calculate the odds ratios from
+experimental values of the mean.
+
+\subsection{\tt Estimating the number of items of a particular kind
+from experimental sampling}
+It is possible to estimate the number of items of a particular kind,
+for example defective items in a production, from biased sampling.
+The traditional procedure is to use unbiased sampling. 
+But a model of biased sampling may be used if bias is unavoidable 
+or if bias is desired in order to increase the probability of 
+detecting e.g. defective items.
+
+It is recommended to use sampling with replacement if possible.  
+Sampling with replacement makes it possible to use the binomial
+distribution, whereby the calculation of the number of items
+becomes simpler and more accurate. If sampling with replacement 
+is not possible, then the procedure of sampling without 
+replacement must be carefully controlled in order to get a pure 
+Wallenius' distribution or a pure Fisher's distribution rather 
+than a mixture of the two, as explained in the examples above.
+The value of the bias (odds ratio) must be determined before
+the numbers can be calculated.
+
+Use the functions with names beginning with ``{\tt num}'' to 
+calculate the number of items of each kind from the result
+of a sampling experiment with known odds ratios.
+
 
 \section{Demos}
 %

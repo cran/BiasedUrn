@@ -199,10 +199,16 @@ varMWNCHypergeo <- function(
 # Uses Cornfield's approximation. Specified precision is ignored.
 oddsMFNCHypergeo <-
 function(mu, m, n, precision=0.1)  {
-   stopifnot(is.numeric(mu), is.numeric(m),
-   is.numeric(n), is.numeric(precision));
+   stopifnot(is.numeric(mu), is.numeric(m), is.numeric(n), is.numeric(precision));
+   # Convert mu to real vector or matrix without loosing dimensions:
+   if (is.matrix(mu)) {   
+      mux <- matrix(as.real(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
+   }
+   else {
+      mux <- as.real(mu);
+   }
    .Call("oddsMFNCHypergeo", 
-   as.double(mu),         # Observed mean of each x, vector
+   mux,                   # Observed mean of each x, vector
    as.integer(m),         # Number of balls of each color in urn, vector
    as.integer(n),         # Number of balls drawn from urn, scalar
    as.double(precision),  # Precision of calculation, scalar
@@ -218,13 +224,71 @@ function(mu, m, n, precision=0.1)  {
 # Uses approximation. Specified precision is ignored.
 oddsMWNCHypergeo <-
 function(mu, m, n, precision=0.1)  {
-   stopifnot(is.numeric(mu), is.numeric(m),
-   is.numeric(n), is.numeric(precision));
+   stopifnot(is.numeric(mu), is.numeric(m), is.numeric(n), is.numeric(precision));
+   # Convert mu to real vector or matrix without loosing dimensions:
+   if (is.matrix(mu)) {   
+      mux <- matrix(as.real(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
+   }
+   else {
+      mux <- as.real(mu);
+   }
    .Call("oddsMWNCHypergeo", 
-   as.double(mu),         # Observed mean of each x, vector
+   mux,                   # Observed mean of each x, vector
    as.integer(m),         # Number of balls of each color in urn, vector
    as.integer(n),         # Number of balls drawn from urn, scalar
    as.double(precision),  # Precision of calculation, scalar
+   PACKAGE = "BiasedUrn");
+}
+
+
+# *****************************************************************************
+#    numMFNCHypergeo
+#    Estimate number of balls of each color from experimental mean for
+#    Multivariate Fisher's NonCentral Hypergeometric distribution
+# *****************************************************************************
+# Uses Cornfield's approximation. Specified precision is ignored.
+numMFNCHypergeo <-
+function(mu, n, N, odds, precision=0.1)  {
+   stopifnot(is.numeric(mu), is.numeric(n), is.numeric(N), is.numeric(odds), is.numeric(precision));
+   # Convert mu to real vector or matrix without loosing dimensions:
+   if (is.matrix(mu)) {   
+      mux <- matrix(as.real(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
+   }
+   else {
+      mux <- as.real(mu);
+   }
+   .Call("numMFNCHypergeo", 
+   mux,                   # Observed mean of each x, vector
+   as.integer(n),         # Number of balls drawn from urn, scalar
+   as.integer(N),         # Number of balls in urn before sampling, scalar
+   as.double(odds),       # Odds for each color, vector
+   as.double(precision),  # Precision of calculation, scalar (ignored)
+   PACKAGE = "BiasedUrn");
+}
+
+
+# *****************************************************************************
+#    numMWNCHypergeo
+#    Estimate number of balls of each color from experimental mean for
+#    Multivariate Wallenius' NonCentral Hypergeometric distribution
+# *****************************************************************************
+# Uses approximation. Specified precision is ignored.
+numMWNCHypergeo <-
+function(mu, n, N, odds, precision=0.1)  {
+   stopifnot(is.numeric(mu), is.numeric(n), is.numeric(N), is.numeric(odds), is.numeric(precision));
+   # Convert mu to real vector or matrix without loosing dimensions:
+   if (is.matrix(mu)) {   
+      mux <- matrix(as.real(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
+   }
+   else {
+      mux <- as.real(mu);
+   }
+   .Call("numMWNCHypergeo", 
+   mux,                   # Observed mean of each x, vector
+   as.integer(n),         # Number of balls drawn from urn, scalar
+   as.integer(N),         # Number of balls in urn before sampling, scalar
+   as.double(odds),       # Odds for each color, vector
+   as.double(precision),  # Precision of calculation, scalar (ignored)
    PACKAGE = "BiasedUrn");
 }
 

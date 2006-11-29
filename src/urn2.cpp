@@ -490,8 +490,7 @@ SEXP rprecision  // Precision of calculation, scalar
 
    if (prec >= 0.1) {
       // use approximate calculation methods
-      mfnc.mean(presult);
-      mfnc.variance(presult + colors);
+      mfnc.variance(presult + colors, presult);
    }
    else {
       // use exact calculation
@@ -574,8 +573,7 @@ SEXP rprecision  // Precision of calculation, scalar
 
    if (prec >= 0.1) {
       // use approximate calculation methods
-      mwnc.mean(presult);
-      mwnc.variance(presult + colors);
+      mwnc.variance(presult + colors, presult);
    }
    else {
       // use exact calculation
@@ -593,11 +591,13 @@ SEXP rprecision  // Precision of calculation, scalar
       Estimate odds ratio from mean for the
       Multivariate Fisher's NonCentral Hypergeometric distribution
 ******************************************************************************/
+// Uses the multivariate extension of Cornfield's approximation.
+// Precision is ignored
 REXPORTS SEXP oddsMFNCHypergeo(
 SEXP rmu,        // Number of balls drawn of each color, vector or matrix
 SEXP rm,         // Number of balls of each color in urn, vector
 SEXP rn,         // Number of balls drawn from urn, scalar
-SEXP /*rprecision*/  // Precision of calculation, scalar (unused)
+SEXP rprecision  // Precision of calculation, scalar
 ) {
    // Check number of colors
    int colors = LENGTH(rm);
@@ -614,14 +614,14 @@ SEXP /*rprecision*/  // Precision of calculation, scalar (unused)
    }
    else {
       nres = 1;
-      if (LENGTH(rmu) != colors) error("Length of vectors mu, m, and odds must be the same");
+      if (LENGTH(rmu) != colors) error("Length of vectors mu and m must be the same");
    }
 
    // Get parameter values
    double *pmu   =  REAL(rmu);
    int32 * pm    =  INTEGER(rm);
    int     n     = *INTEGER(rn);
-   //double  prec  = *REAL(rprecision);
+   double  prec  = *REAL(rprecision);
    int     N;                          // Total number of balls
    int     i, j;                       // Loop counter
    int     x1, x2;                     // x limits
@@ -646,11 +646,17 @@ SEXP /*rprecision*/  // Precision of calculation, scalar (unused)
    // Check validity of scalar parameters
    if (n < 0)  error("Negative parameter n");
    if (n > N)  error ("n > sum(m): Taking more items than there are");
-   //if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 1E-7;
+   if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 0.1;
+   if (prec < 0.05) warning ("Cannot obtain high precision");
 
    // Allocate result vector
    SEXP result;  double * presult;
-   PROTECT(result = allocVector(REALSXP, nres * colors));
+   if (nres == 1) {
+      PROTECT(result = allocVector(REALSXP, colors));
+   }
+   else {
+      PROTECT(result = allocMatrix(REALSXP, colors, nres));
+   }
    presult = REAL(result);
 
    // Loop over x inputs
@@ -735,11 +741,12 @@ SEXP /*rprecision*/  // Precision of calculation, scalar (unused)
       Estimate odds ratio from mean for the
       Multivariate Wallenius' NonCentral Hypergeometric distribution
 ******************************************************************************/
+// Uses Manly's approximation. Precision is ignored
 REXPORTS SEXP oddsMWNCHypergeo(
 SEXP rmu,        // Number of balls drawn of each color, vector or matrix
 SEXP rm,         // Number of balls of each color in urn, vector
 SEXP rn,         // Number of balls drawn from urn, scalar
-SEXP /*rprecision*/  // Precision of calculation, scalar (unused)
+SEXP rprecision // Precision of calculation, scalar
 ) {
    // Check number of colors
    int colors = LENGTH(rm);
@@ -756,14 +763,14 @@ SEXP /*rprecision*/  // Precision of calculation, scalar (unused)
    }
    else {
       nres = 1;
-      if (LENGTH(rmu) != colors) error("Length of vectors mu, m, and odds must be the same");
+      if (LENGTH(rmu) != colors) error("Length of vectors mu and m must be the same");
    }
 
    // Get parameter values
    double *pmu   =  REAL(rmu);
    int32 * pm    =  INTEGER(rm);
    int     n     = *INTEGER(rn);
-   //double  prec  = *REAL(rprecision);
+   double  prec  = *REAL(rprecision);
    int     N;                          // Total number of balls
    int     i, j;                       // Loop counter
    int     x1, x2;                     // x limits
@@ -788,11 +795,17 @@ SEXP /*rprecision*/  // Precision of calculation, scalar (unused)
    // Check validity of scalar parameters
    if (n < 0)  error("Negative parameter n");
    if (n > N)  error ("n > sum(m): Taking more items than there are");
-   //if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 1E-7;
+   if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 0.1;
+   if (prec < 0.02) warning ("Cannot obtain high precision");
 
    // Allocate result vector
    SEXP result;  double * presult;
-   PROTECT(result = allocVector(REALSXP, nres * colors));
+   if (nres == 1) {
+      PROTECT(result = allocVector(REALSXP, colors));
+   }
+   else {
+      PROTECT(result = allocMatrix(REALSXP, colors, nres));
+   }
    presult = REAL(result);
 
    // Loop over x inputs
@@ -865,6 +878,485 @@ SEXP /*rprecision*/  // Precision of calculation, scalar (unused)
       if (err & 2) warning("odds is zero with no precision");
    }
    if (err & 0x100) warning("Sum of means should be equal to n");
+
+   // Return result
+   UNPROTECT(1);
+   return(result);
+}
+
+
+/******************************************************************************
+      numMFNCHypergeo
+      Estimate number of balls of each color from experimental mean for
+      Multivariate Fisher's NonCentral Hypergeometric distribution
+******************************************************************************/
+// Uses Cornfield's approximation. Precision is ignored.
+// Calculation method: Solves the multivariate Cornfield's equation by
+// Newton Raphson iteration with r as independent parameter.
+REXPORTS SEXP numMFNCHypergeo(
+SEXP rmu,        // Observed mean of x1
+SEXP rn,         // Number of balls drawn from urn
+SEXP rN,         // Number of balls in urn before sampling
+SEXP rodds,      // Odds of getting a red ball among one red and one white
+SEXP rprecision  // Precision of calculation
+) {
+   int nres;     // Number of results
+   int colors;   // Number of colors
+
+   // Check for vectors
+   if (LENGTH(rn)         != 1 
+   || LENGTH(rN)          != 1 
+   || LENGTH(rprecision)  != 1 
+   ) {
+      error("Parameter has wrong length");
+   }
+
+   // Check mu matrix size
+   if (isMatrix(rmu)) {
+      nres = ncols(rmu);
+      colors = nrows(rmu);
+   }
+   else {
+      nres = 1;
+      colors = LENGTH(rmu);
+   }
+
+   // Check number of colors
+   if (colors < 1) error ("Number of colors too small");
+   if (colors > MAXCOLORS) {
+      error ("Number of colors (%i) exceeds maximum (%i).\n"
+      "You may recompile the BiasedUrn package with a bigger value of MAXCOLORS in the file Makevars.",
+      colors, MAXCOLORS);
+   }
+
+   // Get parameter values
+   double *pmu   =  REAL(rmu);
+   int     n     = *INTEGER(rn);
+   int     N     = *INTEGER(rN);
+   double *podds =  REAL(rodds);
+   double  prec  = *REAL(rprecision);
+
+   int     i, j;                       // Loop counter
+   int     err, err1 = 0;              // Remember any error
+   int     cu = 0;                     // Number of colors with nonzero odds
+   double  smu;                        // Sum of means, reciprocal.
+   double  mu[MAXCOLORS];              // Normalized means
+
+   // Check if odds = 1
+   double OddsOne[MAXCOLORS];          // Used if odds = 1
+   if (LENGTH(rodds) == 1 && *podds == 1.) {
+      // Odds = scalar 1. Set to vector of all 1's
+      for (i = 0; i < colors; i++) OddsOne[i] = 1.;
+      podds = OddsOne;
+   }
+   else {
+      if (LENGTH(rodds) != colors) {
+         // Size mismatch
+         if (isMatrix(rmu)) {      
+            error("matrix mu must have one row for each color and one column for each sample");
+         }
+         else {
+            error("Length of vectors mu and odds must be the same");
+         }
+      }
+   }
+
+   // Check validity of parameters
+   if (n < 0 || N < 0) error("Negative parameter");
+   if ((unsigned int)N > 2000000000) error("Overflow");
+   if (n > N) error ("n > N: Taking more items than there are");
+   if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 0.1;
+   if (prec < 0.05) warning ("Cannot obtain high precision");
+
+   // Check validity of odds
+   for (i = cu = 0; i < colors; i++) {
+      if (!R_FINITE(podds[i]) || podds[i] < 0) error("Invalid value for odds[%i]", i+1);
+      if (podds[i] > 0) cu++;
+   }
+
+   // Allocate result vector
+   SEXP result;  double * presult;
+   if (nres == 1) {
+      PROTECT(result = allocVector(REALSXP, colors));
+   }
+   else {
+      PROTECT(result = allocMatrix(REALSXP, colors, nres));
+   }
+   presult = REAL(result);
+
+   // Loop for all mu inputs
+   for (j = 0; j < nres; j++, presult += colors, pmu += colors) {
+      err = 0;
+
+      // Make results NAN in case of error exits below
+      for (i = 0; i < colors; i++) presult[i] = R_NaN;  
+
+      // Check limits
+      if (n == 0) {
+         err1 |= 1;         // Indetermined
+         continue;
+      }
+
+      // Check sum of mu must equal n
+      for (i = 0, smu = 0.; i < colors; i++) smu += pmu[i];
+      if (smu <= 0.) {
+         err1 |= 0x800;     // Sum of means must be positive
+         break;
+      }
+      if (fabs(smu - n) > 0.02 * n) {
+         err |= 0x100; // Warning: sum not approx. equal to n
+      }
+      smu = n / smu;
+      for (i = 0; i < colors; i++) {
+         mu[i] = pmu[i] * smu;    // Normalize mu
+      }
+
+      // More parameter checks
+      if (n == N) {               // Results known exactly
+         for (i = 0; i < colors; i++) {
+            if (podds[i] == 0 && mu[i] != 0) {
+               err1 |= 0x10;        // Out of range
+            }
+            else {
+               presult[i] = mu[i];
+            }
+         }
+         continue;
+      }
+
+      // Check odds
+      if (cu < colors || colors < 2) {
+         for (i = 0; i < colors; i++) {
+            if (podds[i] == 0) {
+               if (mu[i] != 0) err1 |= 0x10;   // Out of range
+               else err1 |= 1;                 // Indetermined
+            }
+            else {
+               if (cu == 1) presult[i] = N;    // Known exactly
+            }
+         }
+         continue;
+      }
+
+      // check mu within bounds
+      for (i = 0; i < colors; i++) {
+         if (mu[i] <= 0.) {
+            if (mu[i] == 0.) {
+               presult[i] = 0;
+               err |= 2;         // Zero
+            }
+            else {
+               err |= 8;         // Out of range
+            }
+         }
+         if (mu[i] >= double(n)) {
+            if (mu[i] == double(n)) {
+               presult[i] = N;
+               err |= 4;
+            }
+            else {
+               err |= 8;         // Out of range
+            }
+         }
+      }
+
+      if (err & 0x18) {
+         // Results invalid
+         err1 |= err;
+         break;
+      }
+
+      // Calculate m[]
+      double z;              // Newton Raphson function value
+      double zd;             // Newton Raphson derivative of z
+      double r, lastr;       // Independent parameter in Newton Raphson iteration
+      int niter = 0;         // Number of iterations
+
+      // Initial guess
+      r = 1.;
+
+      // Newton Raphson iteration
+      do {
+         lastr = r;
+         // Calculate z and zd
+         z = zd = 0.;
+         for (i = 0; i < colors; i++) {
+            z  += mu[i] * (1. + 1./(r*podds[i]));
+            zd -= mu[i] / (podds[i]*r*r);
+         }
+         r -= (z - N) / zd;
+         if (r <= 0.) {
+            // r must be positive. Get r within range
+            if (r < -lastr) {
+               r = lastr * 0.125;
+            }
+            else {
+               r = lastr * 0.5;
+            }
+         }
+         if (++niter > 200) error ("Convergence problem");
+
+      } while (fabs(r-lastr) > r * 1E-8);
+
+      // Get results from r
+      for (i = 0; i < colors; i++) {
+         presult[i] = mu[i] * (r*podds[i] + 1.) / (r*podds[i]);
+      }
+      err1 |= err;
+   }
+
+   // Check for errors
+   if (err1 & 0x808) error("Mean is out of range");
+   else {
+      if (err1 & 0x010) warning("Zero odds conflicts with nonzero mean");
+      if (err1 & 1) warning("Number of items is indetermined");
+      if (err1 & 0x100) warning("Sum of means is not equal to n");
+   }
+
+   // Return result
+   UNPROTECT(1);
+   return(result);
+}
+
+
+/******************************************************************************
+      numMWNCHypergeo
+      Estimate number of balls of each color from experimental mean for
+      Multivariate Wallenius' NonCentral Hypergeometric distribution
+******************************************************************************/
+// Uses Manly's approximation. Precision is ignored.
+// Calculation method: Solves Manly's equation by
+// Newton Raphson iteration with theta as independent parameter.
+REXPORTS SEXP numMWNCHypergeo(
+SEXP rmu,        // Observed mean of x1
+SEXP rn,         // Number of balls drawn from urn
+SEXP rN,         // Number of balls in urn before sampling
+SEXP rodds,      // Odds of getting a red ball among one red and one white
+SEXP rprecision  // Precision of calculation
+) {
+   int nres;     // Number of results
+   int colors;   // Number of colors
+
+   // Check for vectors
+   if (LENGTH(rn)         != 1 
+   || LENGTH(rN)          != 1 
+   || LENGTH(rprecision)  != 1 
+   ) {
+      error("Parameter has wrong length");
+   }
+
+   // Check mu matrix size
+   if (isMatrix(rmu)) {
+      nres = ncols(rmu);
+      colors = nrows(rmu);
+   }
+   else {
+      nres = 1;
+      colors = LENGTH(rmu);
+   }
+
+   // Check number of colors
+   if (colors < 1) error ("Number of colors too small");
+   if (colors > MAXCOLORS) {
+      error ("Number of colors (%i) exceeds maximum (%i).\n"
+      "You may recompile the BiasedUrn package with a bigger value of MAXCOLORS in the file Makevars.",
+      colors, MAXCOLORS);
+   }
+
+   // Get parameter values
+   double *pmu   =  REAL(rmu);
+   int     n     = *INTEGER(rn);
+   int     N     = *INTEGER(rN);
+   double *podds =  REAL(rodds);
+   double  prec  = *REAL(rprecision);
+
+   int     i, j;                       // Loop counter
+   int     err, err1 = 0;              // Remember any error
+   int     cu = 0;                     // Number of colors with nonzero odds
+   double  smu;                        // Sum of means, reciprocal.
+   double  mu[MAXCOLORS];              // Normalized means
+
+   // Check if odds = 1
+   double OddsOne[MAXCOLORS];          // Used if odds = 1
+   if (LENGTH(rodds) == 1 && *podds == 1.) {
+      // Odds = scalar 1. Set to vector of all 1's
+      for (i = 0; i < colors; i++) OddsOne[i] = 1.;
+      podds = OddsOne;
+   }
+   else {
+      if (LENGTH(rodds) != colors) {
+         // Size mismatch
+         if (isMatrix(rmu)) {      
+            error("matrix mu must have one row for each color and one column for each sample");
+         }
+         else {
+            error("Length of vectors mu and odds must be the same");
+         }
+      }
+   }
+
+   // Check validity of parameters
+   if (n < 0 || N < 0) error("Negative parameter");
+   if ((unsigned int)N > 2000000000) error("Overflow");
+   if (n > N) error ("n > N: Taking more items than there are");
+   if (!R_FINITE(prec) || prec < 0 || prec > 1) prec = 0.1;
+   if (prec < 0.02) warning ("Cannot obtain high precision");
+
+   // Check validity of odds
+   for (i = cu = 0; i < colors; i++) {
+      if (!R_FINITE(podds[i]) || podds[i] < 0) error("Invalid value for odds[%i]", i+1);
+      if (podds[i] > 0) cu++;
+   }
+
+   // Allocate result vector
+   SEXP result;  double * presult;
+   if (nres == 1) {
+      PROTECT(result = allocVector(REALSXP, colors));
+   }
+   else {
+      PROTECT(result = allocMatrix(REALSXP, colors, nres));
+   }
+   presult = REAL(result);
+
+   // Loop for all mu inputs
+   for (j = 0; j < nres; j++, presult += colors, pmu += colors) {
+      err = 0;
+
+      // Make results NAN in case of error exits below
+      for (i = 0; i < colors; i++) presult[i] = R_NaN;  
+
+      // Check limits
+      if (n == 0) {
+         err1 |= 1;         // Indetermined
+         continue;
+      }
+
+      // Check sum of mu must equal n
+      for (i = 0, smu = 0.; i < colors; i++) smu += pmu[i];
+      if (smu <= 0.) {
+         err1 |= 0x800;     // Sum of means must be positive
+         break;
+      }
+      if (fabs(smu - n) > 0.02 * n) {
+         err |= 0x100; // Warning: sum not approx. equal to n
+      }
+      smu = n / smu;
+      for (i = 0; i < colors; i++) {
+         mu[i] = pmu[i] * smu;    // Normalize mu
+      }
+
+      // More parameter checks
+      if (n == N) {               // Results known exactly
+         for (i = 0; i < colors; i++) {
+            if (podds[i] == 0 && mu[i] != 0) {
+               err1 |= 0x10;        // Out of range
+            }
+            else {
+               presult[i] = mu[i];
+            }
+         }
+         continue;
+      }
+
+      // Check odds
+      if (cu < colors || colors < 2) {
+         for (i = 0; i < colors; i++) {
+            if (podds[i] == 0) {
+               if (mu[i] != 0) err1 |= 0x10;   // Out of range
+               else err1 |= 1;                 // Indetermined
+            }
+            else {
+               if (cu == 1) presult[i] = N;    // Known exactly
+            }
+         }
+         continue;
+      }
+
+      // check mu within bounds
+      for (i = 0; i < colors; i++) {
+         if (mu[i] <= 0.) {
+            if (mu[i] == 0.) {
+               presult[i] = 0;
+               err |= 2;         // Zero
+            }
+            else {
+               err |= 8;         // Out of range
+            }
+         }
+         if (mu[i] >= double(n)) {
+            if (mu[i] == double(n)) {
+               presult[i] = N;
+               err |= 4;
+            }
+            else {
+               err |= 8;         // Out of range
+            }
+         }
+      }
+
+      if (err & 0x18) {
+         // Results invalid
+         err1 |= err;
+         break;
+      }
+
+      // Calculate m[]
+      double z;              // Newton Raphson function value
+      double zd;             // Newton Raphson derivative of z
+      double t, lastt;       // Independent parameter in Newton Raphson iteration
+      double eot;            // exp(odds[i]*t)
+      double eot1 = 1.;      // 1 - exp(odds[i]*t)
+      int niter = 0;         // Number of iterations
+
+      // Initial guess
+      t = lastt = -1.;
+
+      // Newton Raphson iteration
+      do {
+         // Calculate z and zd
+         AGAIN:
+         z = zd = 0.;
+         for (i = 0; i < colors; i++) {
+            eot = exp(podds[i]*t);
+            eot1 = 1. - eot;
+            if (eot1 <= 0. || eot <= 0.) {
+               // Out of range
+               lastt = t;
+               t = 0.125 * lastt;
+               goto AGAIN;
+            }
+            z  += mu[i] / eot1;
+            zd += mu[i] * podds[i] * eot / (eot1*eot1);
+         }
+         lastt = t;
+         t -= (z - N) / zd;
+         if (t >= 0.) {
+            // t must be negative. Get t within range
+            if (t > -lastt) {
+               t = lastt * 0.125;
+            }
+            else {
+               t = lastt * 0.5;
+            }
+         }
+         if (++niter > 200) error ("Convergence problem");
+
+      } while (fabs(t-lastt) > -t * 1E-8);
+
+      // Get results from t
+      for (i = 0; i < colors; i++) {
+         presult[i] = mu[i] / (1. - exp(podds[i]*t));
+      }
+      err1 |= err;
+   }
+
+   // Check for errors
+   if (err1 & 0x808) error("Mean is out of range");
+   else {
+      if (err1 & 0x010) warning("Zero odds conflicts with nonzero mean");
+      if (err1 & 1) warning("Number of items is indetermined");
+      if (err1 & 0x100) warning("Sum of means is not equal to n");
+   }
 
    // Return result
    UNPROTECT(1);

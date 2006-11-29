@@ -1405,7 +1405,6 @@ void CMultiWalleniusNCHypergeometric::mean(double * mu) {
       if (t >= 0) {
          t = 0.5 * t1;
       }
-
       if (++iter > 20) { 
          FatalError("Search for mean failed in function CMultiWalleniusNCHypergeometric::mean");
       }
@@ -1425,18 +1424,27 @@ void CMultiWalleniusNCHypergeometric::mean(double * mu) {
 }
 
 
-void CMultiWalleniusNCHypergeometric::variance(double * var) {
-   // calculates approximate variance of multivariate Wallenius' noncentral
-   // hypergeometric distribution (accuracy is not too good).
-   // Result is returned in variance[0..colors-1].
+void CMultiWalleniusNCHypergeometric::variance(double * var, double * mean_) {
+   // calculates approximate variance and mean of multivariate 
+   // Wallenius' noncentral hypergeometric distribution 
+   // (accuracy is not too good).
+   // Variance is returned in variance[0..colors-1].
+   // Mean is returned in mean_[0..colors-1] if not NULL.
    // The calculation is reasonably fast.
    double r1, r2;
    double mu[MAXCOLORS];
    int i;
-   mean(mu);
+
+   // Store mean in array mu if mean_ is NULL
+   if (mean_ == 0) mean_ = mu;
+
+   // Calculate mean
+   mean(mean_);
+
+   // Calculate variance
    for (i = 0; i < colors; i++) {
-      r1 = mu[i] * (m[i]-mu[i]);
-      r2 = (n-mu[i])*(mu[i]+N-n-m[i]);
+      r1 = mean_[i] * (m[i]-mean_[i]);
+      r2 = (n-mean_[i])*(mean_[i]+N-n-m[i]);
       if (r1 <= 0. || r2 <= 0.) {
          var[i] = 0.;
       }

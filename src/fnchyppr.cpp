@@ -490,10 +490,11 @@ void CMultiFishersNCHypergeometric::mean1(double * mu) {
 }
 
 
-void CMultiFishersNCHypergeometric::variance(double * var) {
+void CMultiFishersNCHypergeometric::variance(double * var, double * mean_) {
    // calculates approximate variance of multivariate Fisher's noncentral
    // hypergeometric distribution (accuracy is not too good).
-   // Result is returned in variance[0..colors-1].
+   // Variance is returned in variance[0..colors-1].
+   // Mean is returned in mean_[0..colors-1] if not NULL.
    // The calculation is reasonably fast.
    double r1, r2;
    double mu[MAXCOLORS];
@@ -515,6 +516,19 @@ void CMultiFishersNCHypergeometric::variance(double * var) {
       }
       else {  // unused color
          var[i] = 0.;
+      }
+   }
+
+   // Store mean if mean_ is not NULL
+   if (mean_) {
+      // resolve unused colors
+      for (i = j = 0; i < Colors; i++) {
+         if (nonzero[i]) {
+            mean_[i] = mu[j++];
+         }
+         else {
+            mean_[i] = 0.;
+         }
       }
    }
 }

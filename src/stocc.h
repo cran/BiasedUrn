@@ -409,7 +409,7 @@ public:
    void SetParameters(int32 n, int32 * m, double * odds, int colors); // change parameters
    double probability(int32 * x);      // calculate probability function
    void mean(double * mu);             // calculate approximate mean
-   void variance(double * var);        // calculate approximate variance
+   void variance(double * var, double * mean = 0); // calculate approximate variance and mean
 
       // implementations of different calculation methods
 protected:
@@ -513,9 +513,8 @@ public:
    CMultiFishersNCHypergeometric(int32 n, int32 * m, double * odds, int colors, double accuracy = 1E-9); // constructor
    double probability(int32 * x);      // calculate probability function
    void mean(double * mu);             // calculate approximate mean
-   void variance(double * var);        // calculate approximate variance
+   void variance(double * var, double * mean = 0); // calculate approximate variance and mean
    double moments(double * mean, double * var, int32 * combinations = 0); // calculate exact mean and variance
-
 protected:
    void mean1(double * mu);            // calculate approximate mean except for unused colors
    double lng(int32 * x);              // natural log of proportional function
