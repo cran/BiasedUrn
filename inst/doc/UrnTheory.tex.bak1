@@ -455,24 +455,12 @@ Several different calculation methods are used, depending on the
 parameters.
 
 The calculation methods and sampling methods are documented at \\
-{\tt http://www.agner.org/random/theory/}.
+{\tt http://www.agner.org/random/theory/}. An article with a formal
+description has been submitted to 
+\begin{emph}{Communications in Statistics: Simulation and Computation}\end{emph}.
 
 \section{References}
 
-\noindent Fog, A. (2008a). Calculation Methods for Wallenius' 
-Noncentral Hypergeometric Distribution.
-{\it Communications in Statistics, Simulation and Computation}. 
-Vol. 37, no. 2 (Forthcoming).
-
-\vskip 3mm
-%
-\noindent Fog, A. (2008b). Sampling Methods for Wallenius' 
-and Fisher's Noncentral Hypergeometric Distributions.
-{\it Communications in Statistics, Simulation and Computation}. 
-Vol. 37, no. 2 (Forthcoming).
-
-\vskip 3mm
-%
 \noindent Johnson, N. L., Kemp, A. W. Kotz, S. (2005). {\it
 Univariate Discrete Distributions}. Hoboken, New Jersey: Wiley and
 Sons.
