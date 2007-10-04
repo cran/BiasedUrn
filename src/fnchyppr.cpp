@@ -42,8 +42,38 @@ CFishersNCHypergeometric::CFishersNCHypergeometric(int32 n, int32 m, int32 N, do
 }
 
 
+int32 CFishersNCHypergeometric::mode(void) {
+   // Find mode (exact)
+   // Uses the method of Liao and Rosen, The American Statistician, vol 55,
+   // no 4, 2001, p. 366-369.
+   // Note that there is an error in Liao and Rosen's formula. 
+   // Replace sgn(b) with -1 in Liao and Rosen's formula. 
+
+   double A, B, C, D;                  // coefficients for quadratic equation
+   double x;                           // mode
+   int32 L = m + n - N;
+   int32 m1 = m+1, n1 = n+1;
+
+   if (odds == 1.) { 
+      // simple hypergeometric
+      x = (m + 1.) * (n + 1.) / (N + 2.);
+   }
+   else {
+      // calculate analogously to Cornfield mean
+      A = 1. - odds;
+      B = (m1+n1)*odds - L; 
+      C = -(double)m1*n1*odds;
+      D = B*B -4*A*C;
+      D = D > 0. ? sqrt(D) : 0.;
+      x = (D - B)/(A+A);
+   }
+   return int32(x);
+}
+
+
 double CFishersNCHypergeometric::mean(void) {
-   // find approximate mean
+   // Find approximate mean
+   // Calculation analogous with mode
    double a, b;                        // temporaries in calculation
    double mean;                        // mean
 
@@ -58,7 +88,6 @@ double CFishersNCHypergeometric::mean(void) {
    return mean;
 }
 
-
 double CFishersNCHypergeometric::variance(void) {
    // find approximate variance (poor approximation)    
    double my = mean(); // approximate mean
@@ -68,33 +97,6 @@ double CFishersNCHypergeometric::variance(void) {
    double var = N*r1*r2/((N-1)*(m*r2+(N-m)*r1));
    if (var < 0.) var = 0.;
    return var;
-}
-
-
-int32 CFishersNCHypergeometric::mode(void) {
-   // find mode (exact)
-   double A, B, C, D;                  // coefficients for quadratic equation
-   double xx;                          // mode
-   int32 x;                            // mode
-   int32 L = m + n - N;
-   int32 m1 = m+1, n1 = n+1;
-
-   if (odds == 1.) { 
-      // simple hypergeometric
-      xx = (double)m1*n1*odds/((m1+n1)*odds-L);
-   }
-   else {
-      // calculate analogously to Cornfield mean
-      A = 1. - odds;
-      B = (m1+n1)*odds - L; 
-      C = -(double)m1*n1*odds;
-      D = B*B -4*A*C;
-      D = D > 0. ? sqrt(D) : 0.;
-      xx = (D - B)/(A+A);
-   }
-   x = int32(xx);                      // floor(xx)
-   if (x > xmax) x = xmax;             // protect against precision loss
-   return x;
 }
 
 
