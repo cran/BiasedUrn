@@ -1,7 +1,13 @@
-/***************************** RANDOMC.H *********************** 2001-10-24 AF *
+/*****************************   randomc.h   **********************************
+* Author:        Agner Fog
+* Date created:  1997
+* Last modified: 2011-08-05
+* Project:       randomc.h
+* Source URL:    www.agner.org/random
 *
-* This file contains class declarations and other definitions for the C++ 
-* library of uniform random number generators.
+* Description:
+* This header file contains class declarations and other definitions for the 
+* randomc class library of uniform random number generators in C++ language.
 *
 * Overview of classes:
 * ====================
@@ -74,7 +80,7 @@
 * The file randomc.htm contains further documentation on these random number
 * generators.
 *
-* © 1997 - 2004 Agner Fog. 
+* © 1997 - 2011 Agner Fog. 
 * GNU General Public License www.gnu.org/copyleft/gpl.html
 *******************************************************************************/
 
@@ -104,7 +110,7 @@
 
 void EndOfProgram(void);               // system-specific exit code (userintf.cpp)
 
-void FatalError(char * ErrorText);     // system-specific error reporting (userintf.cpp)
+void FatalError(const char * ErrorText); // system-specific error reporting (userintf.cpp)
 
 
 /***********************************************************************

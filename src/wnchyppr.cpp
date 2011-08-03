@@ -1,5 +1,11 @@
-/************************** WNCHYPPR.CPP ********************** 2002-10-20 AF *
+/*************************** wnchyppr.cpp **********************************
+* Author:        Agner Fog
+* Date created:  2002-10-20
+* Last modified: 2011-08-05
+* Project:       stocc.zip
+* Source URL:    www.agner.org/random
 *
+* Description:
 * Calculation of univariate and multivariate Wallenius noncentral 
 * hypergeometric probability distribution.
 *
@@ -9,11 +15,14 @@
 * Documentation:
 * ==============
 * The file stocc.h contains class definitions.
-* The file stocc.htm contains further instructions.
 * The file nchyp.pdf, available from www.agner.org/random/theory 
 * describes the theory of the calculation methods.
+* The file ran-instructions.pdf contains further documentation and 
+* instructions.
 *
-*******************************************************************************/
+* Copyright 2002-2011 by Agner Fog. 
+* GNU General Public License http://www.gnu.org/licenses/gpl.html
+*****************************************************************************/
 
 #include <string.h>                    // memcpy function
 #include "stocc.h"                     // class definition
@@ -279,16 +288,24 @@ double Erf (double x) {
 int32 FloorLog2(float x) {
    // This function calculates floor(log2(x)) for positive x.
    // The return value is <= -127 for x <= 0.
+
+   union UfloatInt {  // Union for extracting bits from a float
+      float f;
+      int32 i;
+      UfloatInt(float ff) {f = ff;}  // constructor
+   };
+
 #if defined(_M_IX86) || defined(__INTEL__) || defined(_M_X64) || defined(__IA64__) || defined(__POWERPC__)
    // Running on a platform known to use IEEE-754 floating point format
-   int32 n = *(int32*)&x;
+   //int32 n = *(int32*)&x;
+   int32 n = UfloatInt(x).i;
    return (n >> 23) - 0x7F;
 #else
    // Check if floating point format is IEEE-754
-   static const float one = 1.0f;
-   if (*(int32*)&one == 0x3F800000) {
+   static const UfloatInt check(1.0f);
+   if (check.i == 0x3F800000) {
       // We have the standard IEEE floating point format
-      int32 n = *(int32*)&x;
+      int32 n = UfloatInt(x).i;
       return (n >> 23) - 0x7F;
    }
    else {
@@ -442,7 +459,7 @@ double CWalleniusNCHypergeometric::moments(double * mean_, double * var_) {
       sy += y; sxy += x1 * y; sxxy += x1 * x1 * y;
       if (y < accur && x != xm) break;
    }
-   for (x=xm-1; x>=xmin; x--) {
+   for (x = xm-1; x >= xmin; x--) {
       y = probability(x);
       x1 = x - xm;  // subtract approximate mean to avoid loss of precision in sums
       sy += y; sxy += x1 * y; sxxy += x1 * x1 * y;
@@ -469,7 +486,7 @@ int32 CWalleniusNCHypergeometric::mode(void) {
    }
    else {
       // find mode
-      double f, f2 = -1.;  
+      double f, f2 = -1.; // f2 = 0.; 
       int32 xi, x2;
       int32 xmin = m + n - N;  if (xmin < 0) xmin = 0;  // calculate xmin
       int32 xmax = n;  if (xmax > m) xmax = m;          // calculate xmax
@@ -932,7 +949,7 @@ double CWalleniusNCHypergeometric::integrate() {
    lnbico();                            // compute log of binomial coefficients
 
    // choose method:
-   if (w < 0.02 || w < 0.1 && (x==m || n-x==N-m) && accuracy > 1E-6) {
+   if (w < 0.02 || (w < 0.1 && (x==m || n-x==N-m) && accuracy > 1E-6)) {
       // normal method. Step length determined by peak width w
       double delta, s1;
       s1 = accuracy < 1E-9 ? 0.5 : 1.;
@@ -1166,7 +1183,7 @@ double CWalleniusNCHypergeometric::probability(int32 x_) {
       return binoexpand();
    }
 
-   if (double(n)*x0 < 1000 || double(n)*x0 < 10000 && (N > 1000.*n || em)) {
+   if (double(n)*x0 < 1000 || (double(n)*x0 < 10000 && (N > 1000.*n || em))) {
       return recursive();
    }
 
@@ -1238,7 +1255,7 @@ int32 CWalleniusNCHypergeometric::MakeTable(double * table, int32 MaxLength, int
    if (m < LengthNeeded) LengthNeeded = m;
    if (n < LengthNeeded) LengthNeeded = n; // LengthNeeded = min(m1,m2,n)
    area = double(n)*LengthNeeded;      // Estimate calculation time for table method
-   UseTable = area < 5000. || area < 10000. && N > 1000. * n;
+   UseTable = area < 5000. || (area < 10000. && N > 1000. * n);
 
    if (MaxLength <= 0) {
       // Return UseTable and LengthNeeded

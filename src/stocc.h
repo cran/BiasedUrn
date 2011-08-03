@@ -1,5 +1,11 @@
-/***************************** STOCC.H ************************ 2004-01-08 AF *
+/*****************************   stocc.h   **********************************
+* Author:        Agner Fog
+* Date created:  2004-01-08
+* Last modified: 2011-08-05
+* Project:       randomc.h
+* Source URL:    www.agner.org/random
 *
+* Description:
 * This file contains function prototypes and class declarations for the C++ 
 * library of non-uniform random number generators. Most functions are fast and 
 * accurate, even for extreme values of the parameters.
@@ -12,7 +18,7 @@
 * System-specific exit code. You may modify this to make it fit your
 * user interface.
 *
-* void FatalError(char * ErrorText);
+* void FatalError(const char * ErrorText);
 * Used for outputting error messages from the other functions and classes.
 * You may have to modify this function to make it fit your user interface.
 *
@@ -183,7 +189,7 @@
 * noncentral hypergeometric distributions and theoretical explanations of 
 * the methods for calculating and sampling from these.
 *
-* © 2002, 2004 Agner Fog. GNU General Public License www.gnu.org/copyleft/gpl.html
+* © 2002-2011 Agner Fog. GNU General Public License www.gnu.org/copyleft/gpl.html
 *******************************************************************************/
 
 #ifndef STOCC_H

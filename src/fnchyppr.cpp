@@ -1,5 +1,11 @@
-/************************** FNCHYPPR.CPP ********************** 2002-10-20 AF *
+/*************************** fnchyppr.cpp **********************************
+* Author:        Agner Fog
+* Date created:  2002-10-20
+* Last modified: 2011-08-05
+* Project:       stocc.zip
+* Source URL:    www.agner.org/random
 *
+* Description:
 * Calculation of univariate and multivariate Fisher's noncentral hypergeometric
 * probability distribution.
 *
@@ -9,9 +15,11 @@
 * Documentation:
 * ==============
 * The file stocc.h contains class definitions.
-* The file stocc.htm contains further instructions.
+* Further documentation on www.agner.org/random
 *
-*******************************************************************************/
+* Copyright 2002-2011 by Agner Fog. 
+* GNU General Public License http://www.gnu.org/licenses/gpl.html
+*****************************************************************************/
 
 #include <string.h>                    // memcpy function
 #include "stocc.h"                     // class definition

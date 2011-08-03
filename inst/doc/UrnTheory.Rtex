@@ -8,7 +8,8 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 %
-\usepackage{c:/R/share/texmf/Sweave}
+% \usepackage{c:/R/share/texmf/Sweave}
+\usepackage{Sweave}
 \begin{document}
 
 \title{Biased Urn Theory}
@@ -55,7 +56,7 @@ such a way that the probability of taking a particular ball at a
 particular draw is equal to this ball's fraction of the total weight of
 all balls that lie in the urn at this moment.
 
-The color of the $n$ balls that are taken in this way will follow Wallenius'
+The colors of the $n$ balls that are taken in this way will follow Wallenius'
 noncentral hypergeometric distribution. This distribution has the 
 probability mass function:
 %
@@ -201,7 +202,8 @@ distributions becomes higher when odds ratios are high and $n$ is near $N$.
 
 Consider the extreme example where an urn contains one red ball with the
 weight 1000, and a thousand white balls each with the weight 1. 
-We want to calculate the probability that the red ball is not taken.
+We want to calculate the probability that the red ball is not taken 
+when balls are taken one by one.
 The probability that the red ball is not taken in the first draw is 
 $\frac{1000}{2000} = \frac 12$. The probability that the red ball is
 not taken in the second draw, under the condition that it was not taken
@@ -455,12 +457,24 @@ Several different calculation methods are used, depending on the
 parameters.
 
 The calculation methods and sampling methods are documented at \\
-{\tt http://www.agner.org/random/theory/}. An article with a formal
-description has been submitted to 
-\begin{emph}{Communications in Statistics: Simulation and Computation}\end{emph}.
+{\tt http://www.agner.org/random/theory/}.
 
 \section{References}
 
+\noindent Fog, A. (2008a). Calculation Methods for Wallenius' 
+Noncentral Hypergeometric Distribution.
+{\it Communications in Statistics, Simulation and Computation}. 
+Vol. 37, no. 2, pp 258-273.
+
+\vskip 3mm
+%
+\noindent Fog, A. (2008b). Sampling Methods for Wallenius' 
+and Fisher's Noncentral Hypergeometric Distributions.
+{\it Communications in Statistics, Simulation and Computation}. 
+Vol. 37, no. 2, pp 241-257.
+
+\vskip 3mm
+%
 \noindent Johnson, N. L., Kemp, A. W. Kotz, S. (2005). {\it
 Univariate Discrete Distributions}. Hoboken, New Jersey: Wiley and
 Sons.

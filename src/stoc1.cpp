@@ -1,19 +1,23 @@
-/***************************** STOC1.CPP *********************** 2002-01-04 AF *
+/*************************** stoc1.cpp **********************************
+* Author:        Agner Fog
+* Date created:  2002-01-04
+* Last modified: 2008-11-30
+* Project:       stocc.zip
+* Source URL:    www.agner.org/random
 *
-* Non-uniform random number generators.
+* Description:
+* Non-uniform random number generator functions.
 *
 * This file contains source code for the class StochasticLib1 defined in stocc.h.
 *
 * Documentation:
 * ==============
 * The file stocc.h contains class definitions.
-* The file stocc.htm contains further instructions.
-* The file distrib.pdf contains definitions of the statistic distributions.
-* The file sampmet.pdf contains theoretical descriptions of the methods used
-* for sampling from these distributions.
+* Further documentation at www.agner.org/random
 *
-* © 2002 Agner Fog. GNU General Public License www.gnu.org/copyleft/gpl.html
-*******************************************************************************/
+* Copyright 2002-2008 by Agner Fog. 
+* GNU General Public License http://www.gnu.org/licenses/gpl.html
+*****************************************************************************/
 
 #include "stocc.h"     // class definition
 

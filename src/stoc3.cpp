@@ -1,5 +1,11 @@
-/**************************** STOC3.CPP *********************** 2002-10-02 AF *
+/*************************** stoc3.cpp **********************************
+* Author:        Agner Fog
+* Date created:  2002-10-02
+* Last modified: 2008-11-21
+* Project:       stocc.zip
+* Source URL:    www.agner.org/random
 *
+* Description:
 * Non-uniform random number generator functions.
 *
 * This file contains source code for the class StochasticLib3 derived
@@ -11,13 +17,11 @@
 * Documentation:
 * ==============
 * The file stocc.h contains class definitions.
-* The file stocc.htm contains further instructions.
-* The file nchyp.pdf, available from www.agner.org/random/theory contains 
-* theoretical description of Wallenius' and Fisher's noncentral hypergeometric
-* distributions and the methods used in this code to sample from these.
+* Further documentation at www.agner.org/random
 *
-* © 2002, 2006 Agner Fog. GNU General Public License www.gnu.org/copyleft/gpl.html
-******************************************************************************/
+* Copyright 2002-2008 by Agner Fog. 
+* GNU General Public License http://www.gnu.org/licenses/gpl.html
+*****************************************************************************/
 
 #include <string.h>                    // memcpy function
 #include "stocc.h"                     // class definitions

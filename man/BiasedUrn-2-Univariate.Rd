@@ -167,6 +167,8 @@ as well as for the (central) hypergeometric distribution.
 \cr
 \code{\link{BiasedUrn-Multivariate}}.
 \cr
+\code{\link{BiasedUrn}}.
+\cr
 \code{\link{fisher.test}}
 }
 

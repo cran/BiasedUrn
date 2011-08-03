@@ -63,8 +63,8 @@ Vector with length = number of colors, or matrix with nrows = number of colors.}
 Length of vector = number of colors.}
 \item{n}{Total number of balls sampled.  Scalar.}
 \item{N}{Total number of balls in urn before sampling.  Scalar.}
-\item{odds}{Odds for each color.  Length of vector = number of colors.  
-The scalar 1 is accepted to give the (central) multivariate hypergeometric distribution.}
+\item{odds}{Odds or weight for each color, arbitrarily scaled.  Length of vector = number of colors.  
+Gives the (central) multivariate hypergeometric distribution if all odds are equal.}
 \item{nran}{Number of random variates to generate.  Scalar.}
 \item{mu}{Mean x for each color. Length of vector = number of colors.}
 \item{precision}{Desired precision of calculation.  Scalar.}
@@ -171,6 +171,8 @@ hypergeometric distribution.
 \code{vignette("UrnTheory")}
 \cr
 \code{\link{BiasedUrn-Univariate}}.
+\cr
+\code{\link{BiasedUrn}}.
 }
 
 \examples{

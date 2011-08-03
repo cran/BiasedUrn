@@ -1,5 +1,16 @@
-// Package BiasedUrn, file urn2.cpp
-// R interface to multivariate noncentral hypergeometric distributions
+/*************************** urn2.cpp **********************************
+* Author:        Agner Fog
+* Date created:  2006
+* Last modified: 2011-08-05
+* Project:       BiasedUrn
+* Source URL:    www.agner.org/random
+*
+* Description:
+* R interface to multivariate noncentral hypergeometric distributions
+*
+* Copyright 2006-2011 by Agner Fog. 
+* GNU General Public License http://www.gnu.org/licenses/gpl.html
+*****************************************************************************/
 
 #include <R.h>
 #include <Rinternals.h>

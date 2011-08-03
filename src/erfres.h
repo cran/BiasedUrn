@@ -1,4 +1,11 @@
-/***************************** ERFRES.CPP **************************************
+/***************************** ERFRES.H **************************************
+* Author:        Agner Fog
+* Date created:  2004-07-10
+* Last modified: 2008-12-12
+* Project:       stocc.zip
+* Source URL:    www.agner.org/random
+*
+* Description:
 Table of residues of a certain expansion of the error function.  
 These tables are used in the Laplace method for calculating Wallenius noncentral
 hypergeometric distribution. Used in CWalleniusNCHypergeometric::laplace() and
@@ -15,7 +22,9 @@ ERFRES_S =    2    (step size from begin to end)
 ERFRES_N =   13    (number of tables)
 ERFRES_L =   48    (length of each table)
 
-*******************************************************************************/
+* Copyright 2004-2008 by Agner Fog. 
+* GNU General Public License http://www.gnu.org/licenses/gpl.html
+*****************************************************************************/
 
 //number of standard deviations to integrate
 double NumSDev[ERFRES_N] = {

@@ -34,8 +34,8 @@ to decide which distribution to use in a specific case.
 \tabular{ll}{
 Package: \tab BiasedUrn\cr
 Type: \tab Package\cr
-Version: \tab 1.01\cr
-Date: \tab 2006-11-29\cr
+Version: \tab 1.04\cr
+Date: \tab 2011-08-04\cr
 License: \tab Gnu GPL\cr
 }
 
@@ -70,6 +70,9 @@ Maximum x \tab maxMHypergeo \tab maxMHypergeo
 }
 
 }
+\note{The implementation cannot run safely in multiple threads simultaneously
+}
+
 \author{
 Agner Fog
 
@@ -88,10 +91,15 @@ Maintainer: Agner Fog <agner@agner.org>
 \seealso{
 \code{vignette("UrnTheory")}
 \cr
+\code{\link{BiasedUrn-Univariate}}.
+\cr
+\code{\link{BiasedUrn-Multivariate}}.
+\cr
 \code{\link{dhyper}}
 \cr
 \code{\link{fisher.test}}
 }
+
 \examples{
 dWNCHypergeo(12, 25, 32, 20, 2.5)
 }
