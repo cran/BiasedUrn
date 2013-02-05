@@ -34,9 +34,9 @@ to decide which distribution to use in a specific case.
 \tabular{ll}{
 Package: \tab BiasedUrn\cr
 Type: \tab Package\cr
-Version: \tab 1.04\cr
-Date: \tab 2011-08-04\cr
-License: \tab Gnu GPL\cr
+Version: \tab 1.05\cr
+Date: \tab 2013-02-05\cr
+License: \tab GPL\cr
 }
 
 \bold{Univariate functions in this package}

@@ -200,12 +200,12 @@ varMWNCHypergeo <- function(
 oddsMFNCHypergeo <-
 function(mu, m, n, precision=0.1)  {
    stopifnot(is.numeric(mu), is.numeric(m), is.numeric(n), is.numeric(precision));
-   # Convert mu to real vector or matrix without loosing dimensions:
+   # Convert mu to double vector or matrix without loosing dimensions:
    if (is.matrix(mu)) {   
-      mux <- matrix(as.real(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
+      mux <- matrix(as.double(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
    }
    else {
-      mux <- as.real(mu);
+      mux <- as.double(mu);
    }
    .Call("oddsMFNCHypergeo", 
    mux,                   # Observed mean of each x, vector
@@ -225,12 +225,12 @@ function(mu, m, n, precision=0.1)  {
 oddsMWNCHypergeo <-
 function(mu, m, n, precision=0.1)  {
    stopifnot(is.numeric(mu), is.numeric(m), is.numeric(n), is.numeric(precision));
-   # Convert mu to real vector or matrix without loosing dimensions:
+   # Convert mu to double vector or matrix without loosing dimensions:
    if (is.matrix(mu)) {   
-      mux <- matrix(as.real(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
+      mux <- matrix(as.double(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
    }
    else {
-      mux <- as.real(mu);
+      mux <- as.double(mu);
    }
    .Call("oddsMWNCHypergeo", 
    mux,                   # Observed mean of each x, vector
@@ -250,12 +250,12 @@ function(mu, m, n, precision=0.1)  {
 numMFNCHypergeo <-
 function(mu, n, N, odds, precision=0.1)  {
    stopifnot(is.numeric(mu), is.numeric(n), is.numeric(N), is.numeric(odds), is.numeric(precision));
-   # Convert mu to real vector or matrix without loosing dimensions:
+   # Convert mu to double vector or matrix without loosing dimensions:
    if (is.matrix(mu)) {   
-      mux <- matrix(as.real(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
+      mux <- matrix(as.double(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
    }
    else {
-      mux <- as.real(mu);
+      mux <- as.double(mu);
    }
    .Call("numMFNCHypergeo", 
    mux,                   # Observed mean of each x, vector
@@ -276,12 +276,12 @@ function(mu, n, N, odds, precision=0.1)  {
 numMWNCHypergeo <-
 function(mu, n, N, odds, precision=0.1)  {
    stopifnot(is.numeric(mu), is.numeric(n), is.numeric(N), is.numeric(odds), is.numeric(precision));
-   # Convert mu to real vector or matrix without loosing dimensions:
+   # Convert mu to double vector or matrix without loosing dimensions:
    if (is.matrix(mu)) {   
-      mux <- matrix(as.real(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
+      mux <- matrix(as.double(mu), nrow=dim(mu)[1], ncol=dim(mu)[2]);
    }
    else {
-      mux <- as.real(mu);
+      mux <- as.double(mu);
    }
    .Call("numMWNCHypergeo", 
    mux,                   # Observed mean of each x, vector
