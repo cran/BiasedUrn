@@ -1,4 +1,4 @@
-0f84e2898d96b23c8da547a100fe1397 *DESCRIPTION
+7f7538949606cf2a12277d10397c81a4 *DESCRIPTION
 9fa4a3e4d963627db9d413967e9d9035 *NAMESPACE
 ec4aeb239b877144b70e3f3704367577 *R/urn1.R
 e8c596d16048677b6ffaa18704123b1b *R/urn2.R
@@ -25,5 +25,5 @@ b2fb76cd6f7ec73231499db763d364bf *src/stocR.h
 196790e709f48dc5809fe12148d95be5 *src/stocc.h
 645795fc46d1d9c51c8ad2c045544ed3 *src/urn1.cpp
 2408d260c33a7f94bafd55ea7c2bed27 *src/urn2.cpp
-4217f8a1d5f11d77cd9b5c2f26524814 *src/wnchyppr.cpp
+dde83a2f43ab3ba83100f4e34a9cbb01 *src/wnchyppr.cpp
 ce2ab2b8db398976a55e06637399e0de *vignettes/UrnTheory.Rtex

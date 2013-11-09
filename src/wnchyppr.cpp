@@ -24,7 +24,7 @@
 * GNU General Public License http://www.gnu.org/licenses/gpl.html
 *****************************************************************************/
 
-#include <string.h>                    // memcpy function
+#include <string.h>                    // memmove function
 #include "stocc.h"                     // class definition
 #include "erfres.h"                    // table of error function residues (Don't precompile this header)
 
@@ -1309,7 +1309,7 @@ int32 CWalleniusNCHypergeometric::MakeTable(double * table, int32 MaxLength, int
       i1 = i2 = x2 - x1 + 1;              // desired table length
       if (i2 > MaxLength) i2 = MaxLength; // limit table length
       *xfirst = x1;  *xlast = x1 + i2 - 1;
-      if (i2 > 0) memcpy(table, table+1, i2*sizeof(table[0]));// copy to start of table
+      if (i2 > 0) memmove(table, table+1, i2*sizeof(table[0]));// copy to start of table
       return i1 == i2;                    // true if table size not reduced
    }
 
@@ -1331,7 +1331,7 @@ int32 CWalleniusNCHypergeometric::MakeTable(double * table, int32 MaxLength, int
       *xfirst = x1;
       i2 = x2 - x1 + 1; 
       if (i1 > 0 && i2 > 0) { // move numbers down to beginning of table
-         memcpy(table, table+i1, i2*sizeof(table[0]));
+         memmove(table, table+i1, i2*sizeof(table[0]));
       }
       // Fill rest of table from mean and up
       i2--;
