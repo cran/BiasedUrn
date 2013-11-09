@@ -34,8 +34,8 @@ to decide which distribution to use in a specific case.
 \tabular{ll}{
 Package: \tab BiasedUrn\cr
 Type: \tab Package\cr
-Version: \tab 1.05\cr
-Date: \tab 2013-02-05\cr
+Version: \tab 1.06\cr
+Date: \tab 2013-11-06\cr
 License: \tab GPL\cr
 }
 

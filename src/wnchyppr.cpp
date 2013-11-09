@@ -1,7 +1,7 @@
 /*************************** wnchyppr.cpp **********************************
 * Author:        Agner Fog
 * Date created:  2002-10-20
-* Last modified: 2011-08-05
+* Last modified: 2013-11-06
 * Project:       stocc.zip
 * Source URL:    www.agner.org/random
 *
@@ -20,7 +20,7 @@
 * The file ran-instructions.pdf contains further documentation and 
 * instructions.
 *
-* Copyright 2002-2011 by Agner Fog. 
+* Copyright 2002-2013 by Agner Fog. 
 * GNU General Public License http://www.gnu.org/licenses/gpl.html
 *****************************************************************************/
 
@@ -553,7 +553,7 @@ void CWalleniusNCHypergeometric::findpars() {
    // find r to center peak of integrand at 0.5
    double dd, d1, z, zd, rr, lastr, rrc, rt, r2, r21, a, b, dummy;
    double oo[2];
-   double xx[2] = {x, n-x};
+   double xx[2] = {double(x), double(n-x)};
    int i, j = 0;
    if (omega > 1.) { // make both omegas <= 1 to avoid overflow
       oo[0] = 1.;  oo[1] = 1./omega;
@@ -639,7 +639,7 @@ int CWalleniusNCHypergeometric::BernouilliH(int32 x_, double h, double rh, Stoch
    double qi1;                     // 1-qi
    double omegai[2] = {omega,1.};  // weights for each color
    double romegi;                  // r*omega[i]
-   double xi[2] = {x_, n-x_};      // number of each color sampled
+   double xi[2] = {double(x_), double(n-x_)}; // number of each color sampled
    double k;                       // adjusted width for majorizing function Ypsilon(t)
    double erfk;                    // erf correction
    double rdm1;                    // rd - 1
@@ -804,7 +804,7 @@ double CWalleniusNCHypergeometric::laplace() {
    int degree;                   // max expansion degree
    double accur;                 // stop expansion when terms below this threshold
    double omegai[COLORS] = {omega, 1.}; // weights for each color
-   double xi[COLORS] = {x, n-x}; // number of each color sampled
+   double xi[COLORS] = {double(x), double(n-x)}; // number of each color sampled
    double f0;                    // factor outside integral
    double rho[COLORS];           // r*omegai
    double qi;                    // 2^(-rho)
