@@ -1,7 +1,7 @@
 /*************************** wnchyppr.cpp **********************************
 * Author:        Agner Fog
 * Date created:  2002-10-20
-* Last modified: 2022-10-18
+* Last modified: 2023-02-01
 * Project:       stocc.zip
 * Source URL:    www.agner.org/random
 *
@@ -20,7 +20,7 @@
 * The file ran-instructions.pdf contains further documentation and 
 * instructions.
 *
-* Copyright 2002-2022 by Agner Fog. 
+* Copyright 2002-2023 by Agner Fog. 
 * GNU General Public License v3. 3. http://www.gnu.org/licenses/gpl.html
 *****************************************************************************/
 
@@ -49,7 +49,7 @@ Log and Exp functions with special care for small x
 // Assembly library randomaXX.lib is used.
 // Nothing to include here.
 
-#elif defined(__GNUC__) || defined (__INTEL_COMPILER) || defined(HAVE_EXPM1)
+#elif defined(__GNUC__) || defined (__clang__) || defined(__INTEL_COMPILER) || defined(HAVE_EXPM1)
 // (2) 
 // Functions log1p(x) = log(1+x) and expm1(x) = exp(x)-1 are available
 // in the math libraries of Gnu and Intel compilers 
@@ -109,7 +109,7 @@ double log1pow(double q, double x) {
 
 #else
 // (3)
-// Functions log1p and expm1 are not available in MS and Borland compiler
+// Functions log1p and expm1 are not available in old MS and Borland compiler
 // libraries. Use explicit Taylor expansion when needed.
 
 double pow2_1(double q, double * y0 = 0) {
@@ -340,7 +340,8 @@ Methods for class CWalleniusNCHypergeometric
 CWalleniusNCHypergeometric::CWalleniusNCHypergeometric(int32 n_, int32 m_, int32 N_, double odds_, double accuracy_) {
    // constructor
    accuracy = accuracy_;
-   SetParameters(n_, m_, N_, odds_);}
+   SetParameters(n_, m_, N_, odds_);
+}
 
 
 void CWalleniusNCHypergeometric::SetParameters(int32 n_, int32 m_, int32 N_, double odds) {
@@ -1201,7 +1202,7 @@ double CWalleniusNCHypergeometric::probability(int32 x_) {
 }
 
 
-int32 CWalleniusNCHypergeometric::MakeTable(double * table, int32 MaxLength, int32 * xfirst, int32 * xlast, double cutoff) {
+int32 CWalleniusNCHypergeometric::MakeTable(double * table, int32 MaxLength, int32 * xfirst, int32 * xlast, bool * useTable, double cutoff) {
    // Makes a table of Wallenius noncentral hypergeometric probabilities 
    // table must point to an array of length MaxLength. 
    // The function returns 1 if table is long enough. Otherwise it fills
@@ -1216,9 +1217,9 @@ int32 CWalleniusNCHypergeometric::MakeTable(double * table, int32 MaxLength, int
    //
    // The function will return the following information when MaxLength = 0:
    // The return value is the desired length of table.
-   // *xfirst is 1 if it will be more efficient to call MakeTable than to call
+   // useTable is true if it will be more efficient to call MakeTable than to call
    // probability repeatedly, even if only some of the table values are needed.
-   // *xfirst is 0 if it is more efficient to call probability repeatedly.
+   // useTable is false if it is more efficient to call probability repeatedly.
 
    double * p1, * p2;                  // offset into p
    double mxo;                         // (m-x)*omega
@@ -1229,8 +1230,8 @@ int32 CWalleniusNCHypergeometric::MakeTable(double * table, int32 MaxLength, int
    int32 xi, nu;                       // xi, nu = recursion values of x, n
    int32 x1, x2;                       // lowest and highest x or xi
    int32 i1, i2;                       // index into table
-   int32 UseTable;                     // 1 if table method used
-   int32 LengthNeeded;                 // Necessary table length
+   bool  useTabl;                      // true if table method used
+   int32 lengthNeeded;                 // Necessary table length
 
    // special cases
    if (n == 0 || m == 0) {x1 = 0; goto DETERMINISTIC;}
@@ -1240,28 +1241,30 @@ int32 CWalleniusNCHypergeometric::MakeTable(double * table, int32 MaxLength, int
       if (n > N-m) FatalError("Not enough items with nonzero weight in  CWalleniusNCHypergeometric::MakeTable");
       x1 = 0;
       DETERMINISTIC:
-      if (MaxLength == 0) {
-         if (xfirst) *xfirst = 1;
-         return 1;
-      }
       *xfirst = *xlast = x1;
-      *table = 1.;
+      if (MaxLength && table) *table = 1.;
+      if (useTable) *useTable = true;
       return 1;
    }
+   
+   int32 L = n + m - N;                // parameter
+   x1 = (L > 0) ? L : 0;               // xmin
+   x2 = (n < m) ? n : m;               // xmax
+   *xfirst = x1;  *xlast = x2;   
 
    if (cutoff <= 0. || cutoff > 0.1) cutoff = 0.01 * accuracy;
 
-   LengthNeeded = N - m;               // m2
-   if (m < LengthNeeded) LengthNeeded = m;
-   if (n < LengthNeeded) LengthNeeded = n; // LengthNeeded = min(m1,m2,n)
-   area = double(n)*LengthNeeded;      // Estimate calculation time for table method
-   UseTable = area < 5000. || (area < 10000. && N > 1000. * n);
+   lengthNeeded = N - m;               // m2
+   if (m < lengthNeeded) lengthNeeded = m;
+   if (n < lengthNeeded) lengthNeeded = n; // lengthNeeded = min(m1,m2,n)
+   area = double(n)*lengthNeeded;      // Estimate calculation time for table method
+   useTabl = area < 5000. || (area < 10000. && N > 1000. * n);
+   if (useTable) *useTable = useTabl;
 
    if (MaxLength <= 0) {
-      // Return UseTable and LengthNeeded
-      if (xfirst) *xfirst = UseTable;
-      i1 = LengthNeeded + 2;           // Necessary table length
-      if (!UseTable && i1 > 200) {
+      // Return useTabl and lengthNeeded
+      i1 = lengthNeeded + 2;           // Necessary table length
+      if (!useTabl && i1 > 200) {
          // Calculate necessary table length from standard deviation
          double sd = sqrt(variance()); // calculate approximate standard deviation
          // estimate number of standard deviations to include from normal distribution
@@ -1271,7 +1274,7 @@ int32 CWalleniusNCHypergeometric::MakeTable(double * table, int32 MaxLength, int
       return i1;
    }
 
-   if (UseTable && MaxLength > LengthNeeded) {
+   if (useTabl && MaxLength > lengthNeeded) {
       // use recursion table method
       p1 = p2 = table + 1;             // make space for p1[-1]
       p1[-1] = 0.;  p1[0] = 1.;        // initialize for recursion

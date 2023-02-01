@@ -1,7 +1,7 @@
 /*****************************   stocc.h   **********************************
 * Author:        Agner Fog
 * Date created:  2004-01-08
-* Last modified: 2022-10-18
+* Last modified: 2023-01-29
 * Project:       randomc.h
 * Source URL:    www.agner.org/random
 *
@@ -189,7 +189,7 @@
 * noncentral hypergeometric distributions and theoretical explanations of 
 * the methods for calculating and sampling from these.
 *
-* (c) 2002-2022 Agner Fog. GNU General Public License v.3 www.gnu.org/copyleft/gpl.html
+* (c) 2002-2023 Agner Fog. GNU General Public License v.3 www.gnu.org/copyleft/gpl.html
 *******************************************************************************/
 
 #ifndef STOCC_H
@@ -369,7 +369,7 @@ public:
    CWalleniusNCHypergeometric(int32 n, int32 m, int32 N, double odds, double accuracy=1.E-8); // constructor
    void SetParameters(int32 n, int32 m, int32 N, double odds); // change parameters
    double probability(int32 x);                 // calculate probability function
-   int32 MakeTable(double * table, int32 MaxLength, int32 * xfirst, int32 * xlast, double cutoff = 0.); // make table of probabilities
+   int32 MakeTable(double * table, int32 MaxLength, int32 * xfirst, int32 * xlast, bool * useTable, double cutoff = 0.); // make table of probabilities
    double mean(void);                           // approximate mean
    double variance(void);                       // approximate variance (poor approximation)
    int32 mode(void);                              // calculate mode
@@ -480,7 +480,7 @@ public:
    CFishersNCHypergeometric(int32 n, int32 m, int32 N, double odds, double accuracy = 1E-8); // constructor
    double probability(int32 x);                   // calculate probability function
    double probabilityRatio(int32 x, int32 x0);    // calculate probability f(x)/f(x0)
-   double MakeTable(double * table, int32 MaxLength, int32 * xfirst, int32 * xlast, double cutoff = 0.); // make table of probabilities
+   double MakeTable(double * table, int32 MaxLength, int32 * xfirst, int32 * xlast, bool * useTable, double cutoff = 0.); // make table of probabilities
    double mean(void);                             // calculate approximate mean
    double variance(void);                         // approximate variance
    int32 mode(void);                              // calculate mode (exact)

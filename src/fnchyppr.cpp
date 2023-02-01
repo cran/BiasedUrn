@@ -1,7 +1,7 @@
 /*************************** fnchyppr.cpp **********************************
 * Author:        Agner Fog
 * Date created:  2002-10-20
-* Last modified: 2015-12-27
+* Last modified: 2023-01-29
 * Project:       stocc.zip
 * Source URL:    www.agner.org/random
 *
@@ -17,7 +17,7 @@
 * The file stocc.h contains class definitions.
 * Further documentation on www.agner.org/random
 *
-* Copyright 2002-2015 by Agner Fog. 
+* Copyright 2002-2023 by Agner Fog. 
 * GNU General Public License http://www.gnu.org/licenses/gpl.html
 *****************************************************************************/
 
@@ -232,7 +232,7 @@ double CFishersNCHypergeometric::probabilityRatio(int32 x, int32 x0) {
 }
 
 
-double CFishersNCHypergeometric::MakeTable(double * table, int32 MaxLength, int32 * xfirst, int32 * xlast, double cutoff) {
+double CFishersNCHypergeometric::MakeTable(double * table, int32 MaxLength, int32 * xfirst, int32 * xlast, bool * useTable, double cutoff) {
    // Makes a table of Fisher's noncentral hypergeometric probabilities.
    // Results are returned in the array table of size MaxLength.
    // The values are scaled so that the highest value is 1. The return value
@@ -263,6 +263,7 @@ double CFishersNCHypergeometric::MakeTable(double * table, int32 MaxLength, int3
    // limits for x
    x1 = (L > 0) ? L : 0;               // xmin
    x2 = (n < m) ? n : m;               // xmax
+   *xfirst = x1;  *xlast = x2;   
 
    // special cases
    if (x1 == x2) goto DETERMINISTIC;
@@ -270,17 +271,16 @@ double CFishersNCHypergeometric::MakeTable(double * table, int32 MaxLength, int3
       if (n > N-m) FatalError("Not enough items with nonzero weight in  CWalleniusNCHypergeometric::MakeTable");
       x1 = 0;
       DETERMINISTIC:
-      if (MaxLength == 0) {
-         if (xfirst) *xfirst = 1;
-         return 1;
-      }
+      if (useTable) *useTable = true;
       *xfirst = *xlast = x1;
-      *table = 1.;
+      if (MaxLength && table) *table = 1.;
       return 1;
    }
 
+   if (useTable) *useTable = true;
+
    if (MaxLength <= 0) {
-      // Return UseTable and LengthNeeded
+      // Return useTabl and DesiredLength
       DesiredLength = x2 - x1 + 1;     // max length of table
       if (DesiredLength > 200) {
          double sd = sqrt(variance()); // calculate approximate standard deviation
@@ -288,7 +288,6 @@ double CFishersNCHypergeometric::MakeTable(double * table, int32 MaxLength, int3
          i = (int32)(NumSD(accuracy) * sd + 0.5);
          if (DesiredLength > i) DesiredLength = i;
       }
-      if (xfirst) *xfirst = 1;         // for analogy with CWalleniusNCHypergeometric::MakeTable
       return DesiredLength;
    }
 

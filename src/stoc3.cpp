@@ -1,7 +1,7 @@
 /*************************** stoc3.cpp **********************************
 * Author:        Agner Fog
 * Date created:  2002-10-02
-* Last modified: 2008-11-21
+* Last modified: 2023-01-29
 * Project:       stocc.zip
 * Source URL:    www.agner.org/random
 *
@@ -19,7 +19,7 @@
 * The file stocc.h contains class definitions.
 * Further documentation at www.agner.org/random
 *
-* Copyright 2002-2008 by Agner Fog. 
+* Copyright 2002-2023 by Agner Fog. 
 * GNU General Public License http://www.gnu.org/licenses/gpl.html
 *****************************************************************************/
 
@@ -160,7 +160,7 @@ int32 StochasticLib3::WalleniusNCHypTable (int32 n, int32 m, int32 N, double odd
     wnc_n_last = n;  wnc_m_last = m;  wnc_N_last = N;  wnc_o_last = odds;
 
     CWalleniusNCHypergeometric wnch(n,m,N,odds);   // make object for calculation
-    success = wnch.MakeTable(ytable, TABLELENGTH, &x1, &x2); // make table of probability values
+    success = wnch.MakeTable(ytable, TABLELENGTH, &x1, &x2, 0); // make table of probability values
     if (success) {
       len = x2 - x1 + 1;}              // table long enough. remember length
     else {
@@ -439,7 +439,9 @@ int32 * source, double * weights, int32 n, int colors) {
   if (n < 0 || colors < 0 || colors > MAXCOLORS) FatalError("Parameter out of range in function MultiWalleniusNCHyp");
   if (colors == 0) return;
   if (n == 0) {
-    for (i=0; i<colors; i++) destination[i] = 0; return;}
+    for (i=0; i<colors; i++) destination[i] = 0; 
+    return;
+  }
 
   // check validity of array parameters
   for (i=0, msum=0; i < colors; i++) {

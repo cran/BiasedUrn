@@ -1,14 +1,14 @@
 /*************************** urn1.cpp **********************************
 * Author:        Agner Fog
 * Date created:  2006
-* Last modified: 2022-10-18
+* Last modified: 2023-02-01
 * Project:       BiasedUrn
 * Source URL:    www.agner.org/random
 *
 * Description:
 * R interface to univariate noncentral hypergeometric distributions
 *
-* Copyright 2006-2022 by Agner Fog. 
+* Copyright 2006-2023 by Agner Fog. 
 * GNU General Public License v. 3. http://www.gnu.org/licenses/gpl.html
 *****************************************************************************/
 
@@ -58,6 +58,7 @@ SEXP rprecision  // Precision of calculation
    int32   x1, x2;                     // Table limits
    int     xmin, xmax;                 // Absolute limits for x
    int     i;                          // Loop counter
+   bool    useTable = false;           // unused
 
    // Check validity of parameters
    if (!R_FINITE(odds) || odds < 0) error("Invalid value for odds");
@@ -77,17 +78,18 @@ SEXP rprecision  // Precision of calculation
 
    // Check if it is advantageous to use MakeTable:
    if (nres > 1 &&
-   (BufferLength = (int)fnc.MakeTable(buffer, 0, &x1, &x2),
+   (BufferLength = (int)fnc.MakeTable(buffer, 0, &x1, &x2, &useTable),
    (uint32)nres > (uint32)BufferLength / 32)) {
       // Use MakeTable
       xmin = m1 + n - N;  if (xmin < 0) xmin = 0;  // Minimum x
       xmax = n;  if (xmax > m1) xmax = m1;         // Maximum x
 
       // Allocate buffer
+      if (BufferLength <= 0) BufferLength = 1;      
       buffer = (double*)R_alloc(BufferLength, sizeof(double));
 
       // Make table of probabilities
-      factor = 1. / fnc.MakeTable(buffer, BufferLength, &x1, &x2, prec*0.001);
+      factor = 1. / fnc.MakeTable(buffer, BufferLength, &x1, &x2, &useTable, prec*0.001);
       // Get probabilities from table
       for (i = 0; i < nres; i++) {
          x = px[i];
@@ -159,6 +161,7 @@ SEXP rprecision  // Precision of calculation
    int32   x1, x2;                     // Table limits
    int     xmin, xmax;                 // Absolute limits for x
    int     i;                          // Loop counter
+   bool    useTable = false;           // use table made by MakeTable
 
    // Check validity of parameters
    if (!R_FINITE(odds) || odds < 0) error("Invalid value for odds");
@@ -178,16 +181,17 @@ SEXP rprecision  // Precision of calculation
 
    // Check if it is advantageous to use MakeTable:
    if (nres > 1 &&
-   (BufferLength = wnc.MakeTable(buffer, 0, &x1, &x2),
-   x1)) {
+   (BufferLength = wnc.MakeTable(buffer, 0, &x1, &x2, &useTable),
+   useTable)) {
       // Use MakeTable
       xmin = m1 + n - N;  if (xmin < 0) xmin = 0;  // Minimum x
       xmax = n;  if (xmax > m1) xmax = m1;         // Maximum x
 
       // Allocate buffer
+      if (BufferLength <= 0) BufferLength = 1;      
       buffer = (double*)R_alloc(BufferLength, sizeof(double));
       // Make table of probabilities
-      wnc.MakeTable(buffer, BufferLength, &x1, &x2, prec*0.001);
+      wnc.MakeTable(buffer, BufferLength, &x1, &x2, &useTable, prec*0.001);
       // Get probabilities from table
       for (i = 0; i < nres; i++) {
          x = px[i];
@@ -264,6 +268,7 @@ SEXP rlower_tail // TRUE: P(X <= x), FALSE: P(X > x)
    int     xmin, xmax;                 // Absolute limits for x
    int     xmean;                      // Approximate mean of x
    int     i;                          // Loop counter
+   bool    useTable = false;           // unused
 
    // Check validity of parameters
    if (!R_FINITE(odds) || odds < 0) error("Invalid value for odds");
@@ -286,24 +291,21 @@ SEXP rlower_tail // TRUE: P(X <= x), FALSE: P(X > x)
    CFishersNCHypergeometric fnc(n, m1, N, odds, prec);
 
    // Get necessary buffer length
-   BufferLength = (int)fnc.MakeTable(buffer, 0, &x1, &x2, prec * 0.001);
+   BufferLength = (int)fnc.MakeTable(buffer, 0, &x1, &x2, &useTable, prec * 0.001);
+   if (BufferLength <= 0) BufferLength = 1;
 
    // Allocate buffer
    buffer = (double*)R_alloc(BufferLength, sizeof(double));
 
    // Make table of probabilities
-   factor = 1. / fnc.MakeTable(buffer, BufferLength, &x1, &x2, prec * 0.001);
+   factor = 1. / fnc.MakeTable(buffer, BufferLength, &x1, &x2, &useTable, prec * 0.001);
 
    // Get mean
    xmean = (int)(fnc.mean() + 0.5);           // Round mean
 
    // Check for consistency
-   if (xmean < x1 || xmean > x2) {
-      //!! error("Inconsistency. mean = %i, lower limit = %i, upper limit = %i", xmean, x1, x2);
-      // Error message removed 2022-10-18
-      if (xmean < x1) xmean = x1;
-      if (xmean > x2) xmean = x2;
-   }
+   if (xmean < x1) xmean = x1;
+   if (xmean > x2) xmean = x2;
 
    // Make left tail of table cumulative:
    for (x = x1, sum = 0; x <= xmean; x++) sum = buffer[x-x1] += sum;
@@ -389,6 +391,7 @@ SEXP rlower_tail // TRUE: P(X <= x), FALSE: P(X > x)
    int     xmin, xmax;                 // Absolute limits for x
    int     xmean;                      // Approximate mean of x
    int     i;                          // Loop counter
+   bool    useTable = false;           // unused
 
    // Check validity of parameters
    if (!R_FINITE(odds) || odds < 0) error("Invalid value for odds");
@@ -409,27 +412,34 @@ SEXP rlower_tail // TRUE: P(X <= x), FALSE: P(X > x)
 
    // Make object for calculating probabilities
    CWalleniusNCHypergeometric wnc(n, m1, N, odds, prec);
-
+   
    // Get necessary buffer length
-   BufferLength = wnc.MakeTable(buffer, 0, &x1, &x2, prec * 0.001);
+   BufferLength = wnc.MakeTable(buffer, 0, &x1, &x2, &useTable, prec * 0.001);
+   if (BufferLength <= 0) BufferLength = 1;
 
    // Allocate buffer
    buffer = (double*)R_alloc(BufferLength, sizeof(double));
 
    // Make table of probabilities
-   wnc.MakeTable(buffer, BufferLength, &x1, &x2, prec * 0.001);
+   wnc.MakeTable(buffer, BufferLength, &x1, &x2, &useTable, prec * 0.001);
 
    // Get mean
    xmean = (int)(wnc.mean() + 0.5);           // Round mean
 
    // Check for consistency
-   if (xmean < x1 || xmean > x2) {
-      // !! error("Inconsistency. mean = %i, lower limit = %i, upper limit = %i", xmean, x1, x2);
+   if (xmean < x1 || xmean > x2) {   
+      // error("Inconsistency. mean = %i, lower limit = %i, upper limit = %i", xmean, x1, x2);
       // Error message removed 2022-10-18 because two users have complained.
       // Example: pWNCHypergeo(x = 643, m1 = 643, m2 = 17000, n = 17610, odds=1)
       if (xmean < x1) xmean = x1;
       if (xmean > x2) xmean = x2;
-   }
+   }   
+   
+   if (x2 >= x1 + BufferLength) x2 = x1 + BufferLength - 1; // not needed?
+   
+   /*if (xmean - x1 >= BufferLength || x2 - x1 >= BufferLength) {
+      //error("Inconsistency. mean = %i, lower limit = %i, upper limit = %i, BufferLength=%i", xmean, x1, x2, BufferLength);
+   }*/
 
    // Make left tail of table cumulative:
    for (x = x1, sum = 0; x <= xmean; x++) sum = buffer[x-x1] += sum;
@@ -447,7 +457,7 @@ SEXP rlower_tail // TRUE: P(X <= x), FALSE: P(X > x)
          if (x < x1) {
             p = 0.;                    // Outside table
          }
-         else {
+         else {             
             p = buffer[x-x1];          // Probability from table
          }
          if (!lower_tail) p = 1. - p;  // Invert if right tail
@@ -517,6 +527,7 @@ SEXP rlower_tail // TRUE: P(X <= x), FALSE: P(X > x)
    int32   x1, x2;                     // Table limits
    int     i;                          // Loop counter
    unsigned int a, b, c;               // Used in binary search
+   bool    useTable = false;           // unused
 
    // Check validity of parameters
    if (!R_FINITE(odds) || odds < 0) error("Invalid value for odds");
@@ -535,13 +546,14 @@ SEXP rlower_tail // TRUE: P(X <= x), FALSE: P(X > x)
    CFishersNCHypergeometric fnc(n, m1, N, odds, prec);
 
    // Get necessary buffer length
-   BufferLength = (int)fnc.MakeTable(buffer, 0, &x1, &x2, prec * 0.001);
+   BufferLength = (int)fnc.MakeTable(buffer, 0, &x1, &x2, &useTable, prec * 0.001);
+   if (BufferLength <= 0) BufferLength = 1;
 
    // Allocate buffer
    buffer = (double*)R_alloc(BufferLength, sizeof(double));
 
    // Make table of probabilities
-   factor = fnc.MakeTable(buffer, BufferLength, &x1, &x2, prec * 0.001);
+   factor = fnc.MakeTable(buffer, BufferLength, &x1, &x2, &useTable, prec * 0.001);
 
    // Make table cumulative:
    for (x = x1, sum = 0; x <= x2; x++) sum = buffer[x-x1] += sum;
@@ -623,6 +635,7 @@ SEXP rlower_tail // TRUE: P(X <= x), FALSE: P(X > x)
    int32   x1, x2;                     // Table limits
    int     i;                          // Loop counter
    unsigned int a, b, c;               // Used in binary search
+   bool    useTable = false;           // unused
 
    // Check validity of parameters
    if (!R_FINITE(odds) || odds < 0) error("Invalid value for odds");
@@ -641,13 +654,14 @@ SEXP rlower_tail // TRUE: P(X <= x), FALSE: P(X > x)
    CWalleniusNCHypergeometric wnc(n, m1, N, odds, prec);
 
    // Get necessary buffer length
-   BufferLength = wnc.MakeTable(buffer, 0, &x1, &x2, prec * 0.001);
+   BufferLength = wnc.MakeTable(buffer, 0, &x1, &x2, &useTable, prec * 0.001);
+   if (BufferLength <= 0) BufferLength = 1;
 
    // Allocate buffer
    buffer = (double*)R_alloc(BufferLength, sizeof(double));
 
    // Make table of probabilities
-   wnc.MakeTable(buffer, BufferLength, &x1, &x2, prec * 0.001);
+   wnc.MakeTable(buffer, BufferLength, &x1, &x2, &useTable, prec * 0.001);
 
    // Make table cumulative:
    for (x = x1, sum = 0; x <= x2; x++) sum = buffer[x-x1] += sum;
@@ -722,6 +736,7 @@ SEXP rprecision  // Precision of calculation
    int32   x1, x2;                     // Table limits
    unsigned int a, b, c;               // Used in binary search
    int     i;                          // Loop counter
+   bool    useTable = false;           // unused
 
    // Check validity of parameters
    if (!R_FINITE(odds) || odds < 0) error("Invalid value for odds");
@@ -745,16 +760,17 @@ SEXP rprecision  // Precision of calculation
    if (nran > 4) {
       // Check necessary table length
       CFishersNCHypergeometric fnc(n, m1, N, odds, prec);
-      BufferLength = (int)fnc.MakeTable(buffer, 0, &x1, &x2, prec * 0.001);
+      BufferLength = (int)fnc.MakeTable(buffer, 0, &x1, &x2, &useTable, prec * 0.001);
 
       if (BufferLength / 2 < nran) {
          // It is advantageous to make a table
 
          // Allocate buffer
          buffer = (double*)R_alloc(BufferLength, sizeof(double));
+         if (BufferLength <= 0) BufferLength = 1;
 
          // Make table of probabilities
-         fnc.MakeTable(buffer, BufferLength, &x1, &x2, prec * 0.001);
+         fnc.MakeTable(buffer, BufferLength, &x1, &x2, &useTable, prec * 0.001);
 
          // Make table cumulative:
          for (x = x1, sum = 0; x <= x2; x++) sum = buffer[x-x1] += sum;
@@ -838,6 +854,7 @@ SEXP rprecision  // Precision of calculation
    int32   x1, x2;                     // Table limits
    unsigned int a, b, c;               // Used in binary search
    int     i;                          // Loop counter
+   bool    useTable = false;           // unused
 
    // Check validity of parameters
    if (!R_FINITE(odds) || odds < 0) error("Invalid value for odds");
@@ -861,16 +878,17 @@ SEXP rprecision  // Precision of calculation
    if (nran > 4) {
       // Check necessary table length
       CWalleniusNCHypergeometric wnc(n, m1, N, odds, prec);
-      BufferLength = (int)wnc.MakeTable(buffer, 0, &x1, &x2, prec * 0.001);
+      BufferLength = (int)wnc.MakeTable(buffer, 0, &x1, &x2, &useTable, prec * 0.001);
 
       if (BufferLength / 2 < nran) {
          // It is advantageous to make a table
 
          // Allocate buffer
+         if (BufferLength <= 0) BufferLength = 1;         
          buffer = (double*)R_alloc(BufferLength, sizeof(double));
 
          // Make table of probabilities
-         wnc.MakeTable(buffer, BufferLength, &x1, &x2, prec * 0.001);
+         wnc.MakeTable(buffer, BufferLength, &x1, &x2, &useTable, prec * 0.001);
 
          // Make table cumulative:
          for (x = x1, sum = 0; x <= x2; x++) sum = buffer[x-x1] += sum;
