@@ -1,7 +1,7 @@
 /*************************** wnchyppr.cpp **********************************
 * Author:        Agner Fog
 * Date created:  2002-10-20
-* Last modified: 2023-02-01
+* Last modified: 2023-05-31
 * Project:       stocc.zip
 * Source URL:    www.agner.org/random
 *
@@ -717,50 +717,60 @@ double CWalleniusNCHypergeometric::recursive() {
    // Wallenius noncentral hypergeometric distribution by recursion formula
    // Approximate by ignoring probabilities < accuracy and minimize storage requirement
    const int BUFSIZE = 512;            // buffer size
-   double p[BUFSIZE+2];                // probabilities
-   double * p1, * p2;                  // offset into p
+   double pp[BUFSIZE+2];               // probabilities
+   //double * p1, * p2;                // offset into pp
+   int32 j1, j2;                       // offset into pp
+   /* pointer arithmetics in p1, p2 in earlier versions replaced by offset j1, j2
+      because of false error messages by gcc-UBSAN   */
+
    double mxo;                         // (m-x)*omega
    double Nmnx;                        // N-m-nu+x
    double y, y1;                       // save old p[x] before it is overwritten
-   double d1, d2, dcom;                // divisors in probability formula
+   double d1, d2;                      // divisors in probability formula
    double accuracya;                   // absolute accuracy
    int32 xi, nu;                       // xi, nu = recursion values of x, n
    int32 x1, x2;                       // xi_min, xi_max
 
-   accuracya = 0.005f * accuracy;      // absolute accuracy
-   p1 = p2 = p + 1;                    // make space for p1[-1]
-   p1[-1] = 0.;  p1[0]  = 1.;          // initialize for recursion
+   accuracya = 0.005 * accuracy;       // absolute accuracy
+   j1 = j2 = 1;                        // make space for pp[j1-1]
+   pp[0] = 0.;  pp[1] = 1.;            // initialize for recursion
    x1 = x2 = 0;
-   for (nu=1; nu<=n; nu++) {
-      if (n - nu < x - x1 || p1[x1] < accuracya) {
+   for (nu = 1; nu <= n; nu++) {
+      //if (j1+x1 < 0 || j1+x2 < 0) FatalError("j1+x1 < 0");
+      if (n - nu < x - x1 || pp[j1+x1] < accuracya) {
          x1++;               // increase lower limit when breakpoint passed or probability negligible
-         p2--;               // compensate buffer offset in order to reduce storage space
+         j2--;               // compensate buffer offset in order to reduce storage space
       }
-      if (x2 < x && p1[x2] >= accuracya) {
+      if (x2 < x && pp[j1+x2] >= accuracya) {
          x2++;  y1 = 0.;     // increase upper limit until x has been reached
       }
       else {
-         y1 = p1[x2];
+         y1 = pp[j1+x2];
       }
       if (x1 > x2) return 0.;
-      if (p2+x2-p > BUFSIZE) FatalError("buffer overrun in function CWalleniusNCHypergeometric::recursive");
+      if (j2+x2 > BUFSIZE) FatalError("buffer overrun in function CWalleniusNCHypergeometric::recursive");
 
       mxo = (m-x2)*omega;
       Nmnx = N-m-nu+x2+1;
       for (xi = x2; xi >= x1; xi--) {    // backwards loop
+         //if (j1+xi < 1 || j2+xi < 1) FatalError("j1+xi < 1");
          d2 = mxo + Nmnx;
          mxo += omega; Nmnx--;
          d1 = mxo + Nmnx;
-         dcom = 1. / (d1 * d2);           // save a division by making common divisor
-         y  = p1[xi-1]*mxo*d2*dcom + y1*(Nmnx+1)*d1*dcom;
-         y1 = p1[xi-1];                   // (warning: pointer alias, can't swap instruction order)
-         p2[xi] = y;
+         // save a division by making common divisor
+         //dcom = 1. / (d1 * d2);
+         //y  = pp[j1+xi-1]*mxo*d2*dcom + y1*(Nmnx+1)*d1*dcom;
+         y  = (pp[j1+xi-1]*mxo*d2 + y1*(Nmnx+1)*d1) / (d1 * d2);
+         y1 = pp[j1+xi-1];
+         pp[j2+xi] = y;
       }
-      p1 = p2;
+      j1 = j2;
    }
 
    if (x < x1 || x > x2) return 0.;
-   return p1[x];
+   //if (j1+x < 0) FatalError("j1+x < 0");
+
+   return pp[j1+x];
 }
 
 

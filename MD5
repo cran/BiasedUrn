@@ -1,4 +1,4 @@
-7ca8b45250ad6f5dd8c79cce6f5a4676 *DESCRIPTION
+cad6068876d54980f0f53794e3ba3af7 *DESCRIPTION
 9fa4a3e4d963627db9d413967e9d9035 *NAMESPACE
 ec4aeb239b877144b70e3f3704367577 *R/urn1.R
 e8c596d16048677b6ffaa18704123b1b *R/urn2.R
@@ -11,7 +11,7 @@ adab2da4435745974b8b256e97a50f68 *demo/OddsPrecision.R
 ca257d52b737cf05ab2fc234337f4b43 *demo/SampleWallenius.R
 b3569fe26b9aa87e6704636440db6bc2 *demo/UrnTheory.R
 b8984c72e3eec94bd04fc243e03b450a *inst/doc/UrnTheory.Rtex
-b20b1085a9c6710342412c63854ea8c2 *inst/doc/UrnTheory.pdf
+e1a83af52587f95ce83fc40423f0c6f3 *inst/doc/UrnTheory.pdf
 015c4d242a939a8ce8fc2d1ed733d8f0 *man/BiasedUrn-1-Package.Rd
 fb67f0c0496f9958221a9be21808b3aa *man/BiasedUrn-2-Univariate.Rd
 264645c32aa8fd9536065883ca093779 *man/BiasedUrn-3-Multivariate.Rd
@@ -26,5 +26,5 @@ bae61026a38b1daefd2c6b82a8385d4e *src/stoc3.cpp
 4a16ffee5ac444220ef7511277e3c0cc *src/stocc.h
 12851e5e55fc442f5c2865b322a2db6d *src/urn1.cpp
 2408d260c33a7f94bafd55ea7c2bed27 *src/urn2.cpp
-a85ce81c65e9c34bd6158ed7dfea9dc8 *src/wnchyppr.cpp
+72fee8642ea607fa5e4475c15ad58d5e *src/wnchyppr.cpp
 b8984c72e3eec94bd04fc243e03b450a *vignettes/UrnTheory.Rtex
