@@ -10,6 +10,7 @@
 \concept{evolution by natural selection}
 \docType{package}
 \title{Biased Urn Model Distributions}
+\alias{BiasedUrn-package}
 \description{
 Statistical models of biased sampling in the form of univariate and
 multivariate noncentral hypergeometric distributions, 
@@ -34,8 +35,8 @@ to decide which distribution to use in a specific case.
 \tabular{ll}{
 Package: \tab BiasedUrn\cr
 Type: \tab Package\cr
-Version: \tab 2.0.9\cr
-Date: \tab 2023-01-29\cr
+Version: \tab 2.0.11\cr
+Date: \tab 2023-08-19\cr
 License: \tab GPL-3\cr
 }
 

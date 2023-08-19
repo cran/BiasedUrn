@@ -1,7 +1,7 @@
 /*************************** stoc1.cpp **********************************
 * Author:        Agner Fog
 * Date created:  2002-01-04
-* Last modified: 2008-11-30
+* Last modified: 2023-07-09
 * Project:       stocc.zip
 * Source URL:    www.agner.org/random
 *
@@ -15,9 +15,9 @@
 * The file stocc.h contains class definitions.
 * Further documentation at www.agner.org/random
 *
-* Copyright 2002-2008 by Agner Fog. 
-* GNU General Public License http://www.gnu.org/licenses/gpl.html
-*****************************************************************************/
+* Copyright 2002-2023 by Agner Fog. 
+* GNU General Public License v. 3 http://www.gnu.org/licenses/gpl.html
+***********************************************************************/
 
 #include "stocc.h"     // class definition
 
@@ -423,13 +423,14 @@ int32 StochasticLib1::PoissonLow(double L) {
    The reason for using this method is to avoid the numerical inaccuracies 
    in other methods.
    */   
-   double d, r;
-   d = sqrt(L);
-   if (Random() >= d) return 0;
-   r = Random() * d;
-   if (r > L * (1.-L)) return 0;
-   if (r > 0.5 * L*L * (1.-L)) return 1;
-   return 2;
+   double r, p0, p1, p2;
+   r = Random();
+   p0 = exp(-L);
+   p1 = p0 * L;
+   p2 = p1 * L * 0.5;
+   if (r < p2) return 2;
+   else if (r < p1) return 1;
+   else return 0;
 }
 
 
