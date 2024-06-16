@@ -1,8 +1,8 @@
 Package: BiasedUrn
 Type: Package
 Title: Biased Urn Model Distributions
-Version: 2.0.11
-Date: 2023-08-19
+Version: 2.0.12
+Date: 2024-06-16
 Author: Agner Fog
 Maintainer: Agner Fog <agner@agner.org>
 Description: Statistical models of biased sampling in the form of 
@@ -18,6 +18,6 @@ License: GPL-3
 Encoding: UTF-8
 URL: https://www.agner.org/random/ https://www.r-project.org/
 NeedsCompilation: yes
-Packaged: 2023-08-19 07:33:28 UTC; A
+Packaged: 2024-06-16 05:57:19 UTC; A
 Repository: CRAN
-Date/Publication: 2023-08-19 10:22:32 UTC
+Date/Publication: 2024-06-16 14:50:01 UTC

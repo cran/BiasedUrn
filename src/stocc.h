@@ -197,9 +197,9 @@
 
 #include "randomc.h"
 
-#ifdef R_BUILD
+//#ifdef R_BUILD  // should be defined in Makevars
    #include "stocR.h"           // Include this when building R-language interface
-#endif
+//#endif
 
 
 /***********************************************************************

@@ -35,8 +35,8 @@ to decide which distribution to use in a specific case.
 \tabular{ll}{
 Package: \tab BiasedUrn\cr
 Type: \tab Package\cr
-Version: \tab 2.0.11\cr
-Date: \tab 2023-08-19\cr
+Version: \tab 2.0.12\cr
+Date: \tab 2024-06-16\cr
 License: \tab GPL-3\cr
 }
 
@@ -83,9 +83,9 @@ Maintainer: Agner Fog <agner@agner.org>
 \references{
 \url{https://www.agner.org/random/}
 
-Fog, A. 2008a. Calculation methods for Wallenius’ noncentral hypergeometric distribution.  \emph{Communications in Statistics—Simulation and Computation} \bold{37}, 2 \doi{10.1080/03610910701790269}
+Fog, A. 2008a. Calculation methods for Wallenius' noncentral hypergeometric distribution.  \emph{Communications in Statistics—Simulation and Computation} \bold{37}, 2 \doi{10.1080/03610910701790269}
 
-Fog, A. 2008b. Sampling methods for Wallenius’ and Fisher’s noncentral hypergeometric distributions.  \emph{Communications in Statistics—Simulation and Computation} \bold{37}, 2 \doi{10.1080/03610910701790236}
+Fog, A. 2008b. Sampling methods for Wallenius' and Fisher's noncentral hypergeometric distributions.  \emph{Communications in Statistics—Simulation and Computation} \bold{37}, 2 \doi{10.1080/03610910701790236}
 }
 
 \keyword{ package }

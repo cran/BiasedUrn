@@ -1,7 +1,7 @@
 /**************************** STOCR.H ***************************************
 * Author:        Agner Fog
 * Date created:  2006-10-21
-* Last modified: 2022-10-18
+* Last modified: 2024-06-11
 * Project:       randomc.h
 * Source URL:    www.agner.org/random
 *
@@ -56,13 +56,14 @@
 * noncentral hypergeometric distributions and theoretical explanations of 
 * the methods for calculating and sampling from these.
 *
-* (c) 2006-2022 Agner Fog. GNU General Public License v. 3. www.gnu.org/copyleft/gpl.html
+* (c) 2006-2024 Agner Fog. GNU General Public License v. 3. www.gnu.org/copyleft/gpl.html
 *******************************************************************************/
 
 #ifndef STOC_R_H
 #define STOC_R_H
 
 #include <R.h>
+// #include <R_ext/Error.h> // added 2024. Should'n be necessary
 #include <Rinternals.h>
 
 // Declaration specification for exported functions
